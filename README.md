@@ -10,7 +10,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;family=Orbitron:wght@400;700&amp;display=swap" rel="stylesheet">
-
   <title>Battleship Ultra</title>
   
   <!-- =========================
@@ -589,7 +588,7 @@ pointer-events: none;
 
   <div id="intro-screen">
     <h1>Battleship Ultra</h1>
-    <button id="intro-start">Enter</button>
+    <button id="intro-start" aria-label="Enter game">Enter</button>
   </div>
 
   <!-- =========================
@@ -601,8 +600,8 @@ pointer-events: none;
       <h2 id="endgame-title"></h2>
       <p id="endgame-message"></p>
       <div id="endgame-stats"></div>
-      <button id="endgame-restart" class="modal-btn">Restart</button>
-      <button id="endgame-mainmenu" class="modal-btn">Main Menu</button>
+      <button id="endgame-restart" class="modal-btn" aria-label="Restart game">Restart</button>
+      <button id="endgame-mainmenu" class="modal-btn" aria-label="Return to main menu">Main Menu</button>
     </div>
   </div>
 
@@ -619,19 +618,19 @@ pointer-events: none;
     </div>
     <div class="halo-subtitle">Select Game Mode</div>
     <div class="halo-menu-options">
-      <button class="halo-btn" data-mode="classic" autofocus>Classic</button>
-      <button class="halo-btn" data-mode="salvo">Salvo</button>
+      <button class="halo-btn" data-mode="classic" autofocus aria-label="Classic mode">Classic</button>
+      <button class="halo-btn" data-mode="salvo" aria-label="Salvo mode">Salvo</button>
     </div>
     <div class="halo-subtitle" style="margin-top:18px;">AI Difficulty</div>
     <div class="halo-menu-options">
-      <button class="halo-btn" data-diff="easy">Easy</button>
-      <button class="halo-btn" data-diff="medium">Medium</button>
-      <button class="halo-btn" data-diff="hard">Hard</button>
-      <button class="halo-btn" data-diff="advanced">Advanced</button>
-      <button class="halo-btn" data-diff="god">God</button>
+      <button class="halo-btn" data-diff="easy" aria-label="Easy difficulty">Easy</button>
+      <button class="halo-btn" data-diff="medium" aria-label="Medium difficulty">Medium</button>
+      <button class="halo-btn" data-diff="hard" aria-label="Hard difficulty">Hard</button>
+      <button class="halo-btn" data-diff="advanced" aria-label="Advanced difficulty">Advanced</button>
+      <button class="halo-btn" data-diff="god" aria-label="God difficulty">God</button>
     </div>
     <div style="margin:30px 0 8px 0;">
-      <button class="halo-btn halo-btn-big" id="menu-start">Start Game</button>
+      <button class="halo-btn halo-btn-big" id="menu-start" aria-label="Start game">Start Game</button>
     </div>
     <div class="halo-footer">&copy; 2025 Isaac's Game Studio – Inspired by Halo 3 UI</div>
   </div>
@@ -684,18 +683,18 @@ pointer-events: none;
 <div class="grids-row">
   <div>
     <div class="grid-label">YOUR FLEET</div>
-    <div id="player-board" class="board-grid"></div>
+    <div id="player-board" class="board-grid" role="grid" aria-label="Your fleet"></div>
   </div>
   <div>
     <div class="grid-label">OPPONENT FLEET</div>
-    <div id="enemy-board" class="board-grid"></div>
+    <div id="enemy-board" class="board-grid" role="grid" aria-label="Opponent fleet"></div>
   </div>
 </div>
 
 <!-- Control Buttons (below boards) -->
 <div class="control-panel">
-  <button id="restart-game">Restart</button>
-  <button id="go-main-menu">Main Menu</button>
+  <button id="restart-game" aria-label="Restart game">Restart</button>
+  <button id="go-main-menu" aria-label="Return to main menu">Main Menu</button>
   <button id="confirm-salvo" aria-label="Confirm salvo shots" style="display: none;">Confirm Shots</button>
 </div>
     </div>
@@ -824,7 +823,7 @@ confirmSalvoBtn.onclick = () => {
   // 1. Clear and ensure grid styling
   const boardDiv = document.getElementById(boardId);
   boardDiv.innerHTML = '';
-  boardDiv.className = 'grid board-grid'; // FIX: ensure correct CSS
+  boardDiv.className = 'grid board-grid';
   let radar;
   if(!isPlayer){
     radar = document.createElement('div');
@@ -848,15 +847,24 @@ confirmSalvoBtn.onclick = () => {
         cell.dataset.row = r - 1;
         cell.dataset.col = c - 1;
         cell.innerHTML = '<span class="cell-icon"></span>';
+        cell.tabIndex = 0;
+        cell.setAttribute('role','gridcell');
+        cell.setAttribute('aria-label', `${String.fromCharCode(64+r)}${c}`);
         // Hook up correct event handlers
         if (isPlayer) {
           playerBoard[r - 1][c - 1].cellElem = cell;
           cell.addEventListener('mouseenter', handleCellHover);
           cell.addEventListener('mouseleave', handleCellUnhover);
           cell.addEventListener('click', handleCellPlace);
+          cell.addEventListener('keydown', e => {
+            if(e.key==='Enter' || e.key===' ') { e.preventDefault(); handleCellPlace(e); }
+          });
         } else {
           enemyBoard[r - 1][c - 1].cellElem = cell;
           cell.addEventListener('click', handleTargetClick);
+          cell.addEventListener('keydown', e => {
+            if(e.key==='Enter' || e.key===' ') { e.preventDefault(); handleTargetClick(e); }
+          });
         }
       }
       boardDiv.appendChild(cell);
@@ -1406,10 +1414,10 @@ function restartGame() {
       enemyBoard[r][c] = { hasShip: false, hit: false, miss: false, cellElem: null };
     }
   }
-  confirmSalvoBtn.style.display = 'none';  // <-- FIXED POSITION
+  confirmSalvoBtn.style.display = 'none';
 
   createEmbeddedLabeledBoard('player-board', true);
-  createEmbeddedLabeledBoard('enemy-board', false); // <-- FIXED ID HERE
+  createEmbeddedLabeledBoard('enemy-board', false);
   document.getElementById('main-controls').style.display = 'flex';
   document.getElementById('placement-controls').style.display = 'flex';
   setupPlacementControls();
