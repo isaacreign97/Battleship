@@ -55,19 +55,22 @@
       transition: flex-direction 0.3s ease;
     }
     .grid {
-      background-color: #1a2a3b;
-      border: 2px solid #00ffff;
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+      background: rgba(26, 42, 59, 0.75);
+      border-radius: 12px;
+      border: 1.5px solid #66e0ffaa;
+      box-shadow: 0 4px 18px #2ad8ff33, 0 0 6px #113c5a66 inset;
       width: 300px;
       height: 300px;
       display: grid;
       grid-template-columns: repeat(11, 1fr);
       grid-template-rows: repeat(11, 1fr);
       gap: 2px;
+      backdrop-filter: blur(4px);
     }
     .cell {
-      background-color: #223344;
+      background: rgba(34, 51, 68, 0.85);
       border: 1px solid #334455;
+      border-radius: 4px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -115,25 +118,29 @@
     }
     /* === CONTROL PANEL BUTTONS === */
     .control-panel {
-      background-color: #19283e;
-      border-top: 2px solid #00ffff;
+      background: rgba(25, 40, 62, 0.8);
+      border-top: 2px solid #66e0ff;
       margin-top: 30px;
-      box-shadow: 0 -5px 15px rgba(0, 255, 255, 0.3);
-      padding: 15px;
+      box-shadow: 0 -4px 14px #23e0ff33;
+      padding: 20px;
       text-align: center;
-      border-radius: 10px;
+      border-radius: 12px;
     }
     .control-panel button {
-      background-color: #00ffff;
+      background: #11fdfe;
       border: none;
-      padding: 10px 50px;
-      margin: 10px;
-      color: #0f1b2b;
+      padding: 12px 36px;
+      margin: 0 12px;
+      color: #04313f;
       font-weight: bold;
-      border-radius: 5px;
+      border-radius: 9px;
+      box-shadow: 0 2px 14px #1affff66;
       cursor: pointer;
+      transition: background 0.15s;
     }
-    .control-panel button:hover { background-color: #00bbbb; }
+    .control-panel button:hover {
+      background: #0bcbcc;
+    }
     /* === MODALS/MENU OVERLAYS === */
     .menu-modal-show { display: flex !important; }
     .menu-modal, #main-menu { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f1b2bdc; z-index: 2000;}
@@ -166,10 +173,14 @@
 #game-container {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 32px 0 0 0;
+  padding: 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: rgba(16, 27, 44, 0.65);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 18px #31f4ff44;
 position: relative;   /* This is important for z-index to work! */
   z-index: 10;
 }
