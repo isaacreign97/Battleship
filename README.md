@@ -171,6 +171,11 @@
     .menu-hidden { display: none !important; }
     .modal-btn { margin: 10px; padding: 12px 32px; border-radius: 8px; background: #00ffff; color: #132437; border: none; font-weight: 700; font-size: 1.1rem;}
     .modal-btn:hover { background: #00bbbb; }
+    /* Enhanced endgame styles */
+    #endgame-icon { font-size: 3rem; margin-bottom: 8px; }
+    #endgame-stats { margin: 10px 0; font-size: 1.1rem; text-align: center; }
+    #endgame-modal.victory .modal-box { background: #214d36; }
+    #endgame-modal.defeat .modal-box { background: #4b2b2b; }
     /* === MESSAGE AREAS === */
     #messages { min-height: 1.2em; text-align: center; font-size: 1.1rem; margin: 12px auto 0 auto; }
     #placement-hint { text-align: center; font-size: 1.15rem; color: #3fffd7; min-height: 1.2em; }
@@ -592,8 +597,10 @@ pointer-events: none;
       ========================= -->
   <div id="endgame-modal" class="menu-modal">
     <div class="modal-box">
+      <div id="endgame-icon"></div>
       <h2 id="endgame-title"></h2>
       <p id="endgame-message"></p>
+      <div id="endgame-stats"></div>
       <button id="endgame-restart" class="modal-btn">Restart</button>
       <button id="endgame-mainmenu" class="modal-btn">Main Menu</button>
     </div>
@@ -1344,14 +1351,24 @@ setTurnIndicator("Your Turn");
      MAIN MENU & GAME OVER MODALS
      ============================== */
   function showEndgameModal(win) {
-    document.getElementById("endgame-title").textContent = win ? "You Win! 🎉" : "You Lose 😢";
+    const modal = document.getElementById("endgame-modal");
+    modal.classList.add("menu-modal-show");
+    modal.classList.toggle("victory", win);
+    modal.classList.toggle("defeat", !win);
+    document.getElementById("endgame-title").textContent = win ? "Victory!" : "Defeat";
+    document.getElementById("endgame-icon").textContent = win ? "🎉" : "💀";
     document.getElementById("endgame-message").textContent = win
       ? "Congratulations, Admiral!" : "The enemy fleet prevailed. Try again!";
-    document.getElementById("endgame-modal").classList.add("menu-modal-show");
+    const hits = countPlayerHits();
+    const misses = countPlayerMisses();
+    const total = hits + misses;
+    const acc = total ? Math.round((hits / total) * 100) : 0;
+    document.getElementById("endgame-stats").textContent = `Hits: ${hits} • Misses: ${misses} • Accuracy: ${acc}%`;
     if(bgMusic) bgMusic.pause();
   }
   function hideEndgameModal() {
-    document.getElementById("endgame-modal").classList.remove("menu-modal-show");
+    const modal = document.getElementById("endgame-modal");
+    modal.classList.remove("menu-modal-show", "victory", "defeat");
     if(bgMusic && document.getElementById('main-menu').style.display === 'flex') {
       bgMusic.play().catch(()=>{});
     }
