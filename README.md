@@ -103,7 +103,6 @@
       overflow: hidden;
       box-shadow: 0 2px 5px #0005;
     }
-    .cell:active { transform: scale(0.95); }
     .cell-icon {
       pointer-events: none;
       transition: transform 0.2s;
@@ -130,8 +129,11 @@
     .salvo-selected { outline: 2px solid #fff9b4; background: #bbb820 !important; }
     .cell:not(.label-cell):hover {
       background-color: rgba(85, 120, 170, 0.35);
-      transform: scale(1.05);
+      animation: cellBounce 0.6s infinite;
     }
+    .cell:hover .cell-icon { animation: bounceUpDown 0.6s infinite; }
+    .cell:active { animation: clickDownUp 0.3s; }
+    .cell:active .cell-icon { animation: clickDownUp 0.3s; }
       #enemy-board .cell:hover:not(.label-cell):not(.hit):not(.miss) {
         cursor: crosshair;
         background-color: rgba(75,110,175,0.3);
@@ -170,6 +172,21 @@
       from { transform: scale(0.2); opacity: 0.8; }
       to { transform: scale(1.2); opacity: 0; }
     }
+
+    /* Reusable bounce animations */
+    @keyframes bounceUpDown {
+      0%,100% { transform: translateY(-2px); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes clickDownUp {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(2px); }
+      100% { transform: translateY(0); }
+    }
+    @keyframes cellBounce {
+      0%,100% { transform: scale(1.05) translateY(-2px); }
+      50% { transform: scale(1.05) translateY(-6px); }
+    }
     /* === RESPONSIVE (STACK GRIDS ON MOBILE) === */
     @media screen and (max-width: 768px) and (orientation: portrait) {
       .grids-wrapper { flex-direction: column; align-items: center; }
@@ -200,10 +217,10 @@
     }
     .control-panel button:hover {
       background: linear-gradient(135deg, #00d4ff, #0099c3);
-      transform: translateY(-2px);
       box-shadow: 0 5px 15px #00fff544;
+      animation: bounceUpDown 0.6s infinite;
     }
-    .control-panel button:active { transform: translateY(1px); }
+    .control-panel button:active { animation: clickDownUp 0.3s; }
     /* === MODALS/MENU OVERLAYS === */
     .menu-modal-show { display: flex !important; }
     .menu-modal, #main-menu { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f1b2bdc; z-index: 2000;}
@@ -215,8 +232,8 @@
     .menu-visible { display: flex !important; }
     .menu-hidden { display: none !important; }
     .modal-btn { margin: 10px; padding: 12px 32px; border-radius: 8px; background: #00ffff; color: #132437; border: none; font-weight: 700; font-size: 1.1rem; transition: background 0.15s, transform 0.15s; }
-    .modal-btn:hover { background: #00bbbb; transform: translateY(-2px); }
-    .modal-btn:active { transform: translateY(1px); }
+    .modal-btn:hover { background: #00bbbb; animation: bounceUpDown 0.6s infinite; }
+    .modal-btn:active { animation: clickDownUp 0.3s; }
     /* Enhanced endgame styles */
     #endgame-icon { font-size: 3rem; margin-bottom: 8px; }
     #endgame-stats { margin: 10px 0; font-size: 1.1rem; text-align: center; }
@@ -327,6 +344,9 @@ position: relative;   /* This is important for z-index to work! */
 #powerups .power-icon {
   animation: pulse 1.2s infinite;
 }
+#powerups .power-icon:hover { animation: bounceUpDown 0.6s infinite; }
+#powerups .power-icon:active { animation: clickDownUp 0.3s; }
+}
 @keyframes pulse {0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);}}
 
 /* --- Audio Control Styles --- */
@@ -400,8 +420,8 @@ position: relative;   /* This is important for z-index to work! */
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
 }
-#action-log-tab:hover { background: #215b68; transform: translateY(-1px); }
-#action-log-tab:active { transform: translateY(1px); }
+#action-log-tab:hover { background: #215b68; animation: bounceUpDown 0.6s infinite; }
+#action-log-tab:active { animation: clickDownUp 0.3s; }
 
 #action-log-arrow {
   font-size: 1.2em;
@@ -493,7 +513,10 @@ z-index: 10;
 }
 .control-panel button:hover {
   background: linear-gradient(135deg, #00d4ff, #0099c3);
-  transform: translateY(-2px);
+  animation: bounceUpDown 0.6s infinite;
+}
+.control-panel button:active {
+  animation: clickDownUp 0.3s;
 }
 
 
@@ -566,6 +589,8 @@ pointer-events: none;
     font-weight:600;
     cursor:pointer;
   }
+  #intro-screen button:hover { animation: bounceUpDown 0.6s infinite; }
+  #intro-screen button:active { animation: clickDownUp 0.3s; }
   #enemy-board .radar-sweep {
     z-index: 5;
     pointer-events: none;
@@ -665,11 +690,15 @@ pointer-events: none;
     background: rgba(56,127,255,0.17);
     border-color: #51f6ff;
     box-shadow: 0 5px 34px #2ad8ff44, 0 2px 18px #27c7f1bb;
-    transform: scale(1.048);
+    transform: scale(1.048) translateY(-2px);
+    animation: bounceUpDown 0.6s infinite;
     outline: none;
     z-index: 1;
   }
-  .halo-btn:active { transform: scale(0.98); }
+  .halo-btn:active {
+    transform: scale(0.98);
+    animation: clickDownUp 0.3s;
+  }
   .halo-btn::after {
     content: "";
     position: absolute; left: 0; right: 0; top: 0; bottom: 0;
