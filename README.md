@@ -6,6 +6,11 @@
       ========================= -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Play Battleship Ultra - now with animations" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;family=Orbitron:wght@400;700&amp;display=swap" rel="stylesheet">
+
   <title>Battleship Ultra</title>
   
   <!-- =========================
@@ -17,12 +22,13 @@
     /* === GLOBAL RESET === */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Roboto", Arial, sans-serif;
       background-color: #0f1b2b;
       color: #fff;
       padding: 20px;
     }
     h1 {
+    font-family: "Orbitron", "Segoe UI", Arial, sans-serif;
       margin-bottom: 10px;
       font-size: 3rem;
       color: #3fffd7;
@@ -95,6 +101,16 @@
     .hit { background: #ff6464; }
     .miss { background: #113a44; }
     .salvo-selected { outline: 2px solid #fff9b4; background: #bbb820 !important; }
+      #enemy-board .cell:hover:not(.label-cell):not(.hit):not(.miss) {
+        cursor: crosshair;
+        background-color: rgba(75,110,175,0.3);
+      }
+      #enemy-board .cell:hover:not(.label-cell):not(.hit):not(.miss)::after {
+        content: "🎯";
+        position: absolute;
+        font-size: 1.2rem;
+        pointer-events: none;
+      }
     /* === ANIMATION ICONS === */
     .explosion, .splash, .missile {
       pointer-events: none;
@@ -127,19 +143,21 @@
       border-radius: 12px;
     }
     .control-panel button {
-      background: #11fdfe;
+      background: linear-gradient(135deg, #1de9ff, #00bcd4);
       border: none;
-      padding: 12px 36px;
+      padding: 12px 40px;
       margin: 0 12px;
-      color: #04313f;
-      font-weight: bold;
-      border-radius: 9px;
-      box-shadow: 0 2px 14px #1affff66;
+      color: #042630;
+      font-weight: 600;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px #00fff566;
+      font-size: 1.1rem;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, transform 0.15s;
     }
     .control-panel button:hover {
-      background: #0bcbcc;
+      background: linear-gradient(135deg, #00d4ff, #0099c3);
+      transform: translateY(-2px);
     }
     /* === MODALS/MENU OVERLAYS === */
     .menu-modal-show { display: flex !important; }
@@ -227,9 +245,9 @@ position: relative;   /* This is important for z-index to work! */
   display: inline-block;
   white-space: nowrap;
   min-width: 0;
-  font-size: 1rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .hud-turn-indicator {
@@ -248,6 +266,15 @@ position: relative;   /* This is important for z-index to work! */
   margin-top: 1px;
   font-style: italic;
 }
+#powerups {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+#powerups .power-icon {
+  animation: pulse 1.2s infinite;
+}
+@keyframes pulse {0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);}}
 
 /* --- Pull Down Action Log Styles --- */
 #action-log-panel {
@@ -344,7 +371,8 @@ z-index: 10;
 
 .board-grid {
   margin: 0 8px;
-z-index: 10;
+  z-index: 10;
+  position: relative;
 }
 
 .control-panel {
@@ -354,23 +382,24 @@ z-index: 10;
   gap: 18px;
   margin-top: 28px;
 }
-
 .control-panel button {
-  margin: 0 12px;
-  padding: 10px 36px;
-  background: #11fdfe;
+  background: linear-gradient(135deg, #1de9ff, #00bcd4);
   border: none;
-  border-radius: 9px;
-  font-size: 1.06rem;
-  color: #04313f;
-  font-weight: bold;
-  box-shadow: 0 2px 14px #1affff66;
+  padding: 12px 40px;
+  margin: 0 12px;
+  color: #042630;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px #00fff566;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.15s;
 }
 .control-panel button:hover {
-  background: #0bcbcc;
+  background: linear-gradient(135deg, #00d4ff, #0099c3);
+  transform: translateY(-2px);
 }
+
 
 /* Responsive: Stacks on small screens */
 @media (max-width: 900px) {
@@ -384,12 +413,51 @@ z-index: 10;
   .grid { width: 97vw; height: 97vw; max-width: 340px; max-height: 340px; }
 }
 
- #starfield {
+  #starfield {
     position: fixed; left:0; top:0; width:100vw; height:100vh;
     z-index: -1;
 pointer-events: none;
     background: linear-gradient(160deg, #233d6d 40%, #110b26 100%);
   }
+  #intro-screen {
+    position: fixed;
+    left: 0; top: 0;
+    width: 100vw; height: 100vh;
+    display: flex;
+    align-items: center; justify-content: center;
+    background: radial-gradient(circle at center, rgba(25,40,62,0.95), #0f1b2b);
+    z-index: 2002;
+    flex-direction: column;
+    color: #aee7ff;
+    font-family: 'Orbitron', 'Segoe UI', Arial, sans-serif;
+    animation: fadeInBG 1.2s cubic-bezier(.13,.84,.37,1);
+  }
+  #intro-screen.hide {
+    animation: fadeOutIntro 1s forwards;
+  }
+  @keyframes fadeOutIntro { to { opacity:0; visibility: hidden; } }
+  #intro-screen button {
+    margin-top: 28px;
+    padding: 14px 36px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg,#1de9ff,#00bcd4);
+    color:#042630;
+    font-size:1.2rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  #enemy-board .radar-sweep {
+    pointer-events: none;
+    position: absolute;
+    left:0; top:0;
+    width:100%; height:100%;
+    border-radius: 12px;
+    background: conic-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0) 80%);
+    animation: radar 2s linear infinite;
+    mix-blend-mode: overlay;
+  }
+  @keyframes radar { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
   .halo-menu {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; z-index: 1001;
@@ -511,6 +579,11 @@ pointer-events: none;
 </head>
 <body>
 
+  <div id="intro-screen">
+    <h1>Battleship Ultra</h1>
+    <button id="intro-start">Enter</button>
+  </div>
+
   <!-- =========================
       ENDGAME MODAL OVERLAY
       ========================= -->
@@ -560,16 +633,17 @@ pointer-events: none;
   <div id="game-container" style="display: flex;">
 <h1>Battleship Ultra</h1>
   <h3 id="turn-indicator"></h3>
-  <div id="messages"></div>
+  <div id="messages" aria-live="polite"></div>
     <!-- === SHIP PLACEMENT CONTROLS === -->
     <div id="main-controls" style="display: none; flex-direction: column; align-items: center; width: 100%;">
       <div id="placement-controls">
         <label>Ship:
           <select id="ship-select"></select>
         </label>
-        <button id="toggle-orientation">Horizontal</button>
+        <button id="toggle-orientation" aria-label="Toggle ship orientation">Horizontal</button>
         <span id="placement-hint"></span>
       </div>
+    </div>
 <!-- ======================
      HUD PANEL + ACTION LOG
      ====================== -->
@@ -577,11 +651,12 @@ pointer-events: none;
   <div id="hud-panel">
     <div id="hud-turn" class="hud-turn-indicator"></div>
     <div class="hud-stats">
-      <span id="hud-player-ships">Your Ships: 5</span>
-      <span id="hud-enemy-ships">Enemy Ships: 5</span>
-      <span id="hud-hits">Hits: 0</span>
-      <span id="hud-misses">Misses: 0</span>
+      <span id="hud-player-ships">🚢 5</span>
+      <span id="hud-enemy-ships">🛳 5</span>
+      <span id="hud-hits">🔥 0</span>
+      <span id="hud-misses">💦 0</span>
     </div>
+    <div id="powerups" aria-label="Power ups"></div>
     <div id="hud-last-move"></div>
   </div>
   <div id="action-log-panel" class="collapsed">
@@ -708,7 +783,6 @@ const difficulty = window.selectedDiff || 'easy';
     document.body.appendChild(splash);
     splash.addEventListener('animationend', () => splash.remove());
   }
-
   // Fade out a sunk ship’s cells
   function fadeOutShip(cellElem) {
     cellElem.classList.add('fading-out');
@@ -732,6 +806,11 @@ const difficulty = window.selectedDiff || 'easy';
   const boardDiv = document.getElementById(boardId);
   boardDiv.innerHTML = '';
   boardDiv.className = 'grid board-grid'; // FIX: ensure correct CSS
+  if(!isPlayer){
+    const radar = document.createElement('div');
+    radar.className = 'radar-sweep';
+    boardDiv.appendChild(radar);
+  }
 
   // 2. Build 11x11 grid (first row/col = labels)
   for (let r = 0; r <= BOARD_SIZE; r++) {
@@ -784,14 +863,19 @@ const difficulty = window.selectedDiff || 'easy';
       currentShipIndex = parseInt(e.target.value);
       showPlacementHint();
     };
-    document.getElementById('toggle-orientation').onclick = () => {
-      placementOrientation = (placementOrientation === 'horizontal') ? 'vertical' : 'horizontal';
-      document.getElementById('toggle-orientation').textContent =
-        placementOrientation.charAt(0).toUpperCase() + placementOrientation.slice(1);
-      showPlacementHint();
-    };
+  document.getElementById('toggle-orientation').onclick = () => {
+    placementOrientation = (placementOrientation === 'horizontal') ? 'vertical' : 'horizontal';
+    document.getElementById('toggle-orientation').textContent =
+      placementOrientation.charAt(0).toUpperCase() + placementOrientation.slice(1);
     showPlacementHint();
-  }
+  };
+  document.addEventListener('keydown', e => {
+    if(e.key.toLowerCase() === 'r' && document.getElementById('main-controls').style.display !== 'none') {
+      document.getElementById('toggle-orientation').click();
+    }
+  });
+  showPlacementHint();
+}
 
   // Updates placement hint text
   function showPlacementHint() {
@@ -1256,10 +1340,10 @@ setTurnIndicator("Your Turn");
     document.getElementById("endgame-modal").classList.remove("menu-modal-show");
   }
   function showMainMenu() {
-  document.getElementById("main-menu").style.display = "flex";
-  document.getElementById("game-container").style.display = "none";
-  hideEndgameModal();
-}
+    document.getElementById("main-menu").style.display = "flex";
+    document.getElementById("game-container").style.display = "none";
+    hideEndgameModal();
+  }
   
   /* ==============================
      FULL GAME RESET/RESTART
@@ -1321,13 +1405,23 @@ function restartGame() {
   };
   // On page load: show menu and setup controls
   window.onload = function() {
+    document.getElementById('intro-screen').style.display = 'flex';
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('game-container').style.display = 'none';
+  };
+  document.getElementById('intro-start').onclick = function(){
+    document.getElementById('intro-screen').classList.add('hide');
     showMainMenu();
     restartGame();
   };
-  confirmSalvoBtn.onclick = function() {
     confirmSalvoBtn.style.display = 'none';
     applyPlayerSalvoShots();
   };
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && confirmSalvoBtn.style.display !== 'none') {
+      confirmSalvoBtn.click();
+    }
+  });
   // Starfield
   const canvas = document.getElementById('starfield');
   const ctx = canvas.getContext('2d');
@@ -1433,10 +1527,21 @@ function toggleLogPanel() {
 function updateHUD() {
   // You'll need to implement actual counting logic for your game state!
   // Example for illustration:
-  document.getElementById('hud-player-ships').textContent = `Your Ships: ${playerShips.length}`;
-  document.getElementById('hud-enemy-ships').textContent = `Enemy Ships: ${aiShips.length}`;
-  document.getElementById('hud-hits').textContent = `Hits: ${countPlayerHits()}`;
-  document.getElementById('hud-misses').textContent = `Misses: ${countPlayerMisses()}`;
+    document.getElementById("hud-player-ships").textContent = `🚢 ${playerShips.length}`;
+    document.getElementById("hud-enemy-ships").textContent = `🛳 ${aiShips.length}`;
+    document.getElementById("hud-hits").textContent = `🔥 ${countPlayerHits()}`;
+    document.getElementById("hud-misses").textContent = `💦 ${countPlayerMisses()}`;
+    const pwrap = document.getElementById('powerups');
+    if(pwrap){
+      pwrap.innerHTML = '';
+      const icons = Math.floor(countPlayerHits()/3);
+      for(let i=0;i<icons;i++){
+        const span=document.createElement('span');
+        span.className='power-icon';
+        span.textContent='💡';
+        pwrap.appendChild(span);
+      }
+    }
 }
 
 function setHUDTurn(turn) {
