@@ -187,6 +187,17 @@
       0%,100% { transform: scale(1.05) translateY(-2px); }
       50% { transform: scale(1.05) translateY(-6px); }
     }
+    .scan-mark {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      pointer-events: none;
+      animation: scanFade 0.8s forwards;
+    }
+    @keyframes scanFade { from {opacity:1;} to {opacity:0;} }
     /* === RESPONSIVE (STACK GRIDS ON MOBILE) === */
     @media screen and (max-width: 768px) and (orientation: portrait) {
       .grids-wrapper { flex-direction: column; align-items: center; }
@@ -896,6 +907,11 @@ window.selectedTheme = theme;
   let gameMode = 'classic';
   let pendingPlayerShots = [];
   let hoveredCell = null; // Track which board cell is under the mouse
+  let earnedPowerups = [];
+  let activePowerup = null;
+  let hitsForPower = 3;
+  const powerTypes = ['cluster','sonar'];
+  let nextPowerupIndex = 0;
 const bgMusic = document.getElementById('bg-music');
 const hitSound = document.getElementById('hit-sound');
 const muteBtn = document.getElementById('toggle-mute');
@@ -1319,6 +1335,13 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
       setCellIcon(boardToUpdate[row][col].cellElem, '💥');
       showExplosion(boardToUpdate[row][col].cellElem);
       logAction(`${isPlayer ? 'Player' : 'AI'} hit at ${rowLabel}${colLabel}`, isPlayer ? "log-player" : "log-ai");
+      if(isPlayer){
+        hitsForPower--;
+        if(hitsForPower<=0){
+          grantPowerup();
+          hitsForPower = 3;
+        }
+      }
       if (isShipSunk(enemyShips, row, col, enemyBoard)) {
         let name = markSunkShip(enemyShips, enemyBoard, boardToUpdate, row, col);
         if(isPlayer) {
@@ -1351,6 +1374,20 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
     const col = parseInt(e.target.dataset.col);
     // Don’t allow repeat shots
     if (enemyBoard[row][col].hit || enemyBoard[row][col].miss) return;
+
+    if(activePowerup){
+      const type = activePowerup.type;
+      const idx = activePowerup.index;
+      earnedPowerups.splice(idx,1);
+      activePowerup = null;
+      updateHUD();
+      if(type==='cluster') {
+        useClusterBomb(row,col);
+      } else {
+        useSonarPulse(row,col);
+      }
+      return;
+    }
 
     if (gameMode === 'salvo') {
       const shotsAllowed = countUnsunkShips(playerShips, playerBoard);
@@ -1627,6 +1664,10 @@ function restartGame() {
   playerShips = [];
   aiShips = [];
   pendingPlayerShots = [];
+  earnedPowerups = [];
+  activePowerup = null;
+  hitsForPower = 3;
+  nextPowerupIndex = 0;
   // Set up boards
   playerBoard = [];
   for (let r = 0; r < BOARD_SIZE; r++) {
@@ -1823,6 +1864,65 @@ function toggleLogPanel() {
   panel.classList.toggle('collapsed');
 }
 
+function grantPowerup(){
+  const type = powerTypes[nextPowerupIndex];
+  nextPowerupIndex = (nextPowerupIndex + 1) % powerTypes.length;
+  earnedPowerups.push(type);
+  showMessage(type==='cluster' ? 'Cluster Bomb ready!' : 'Sonar Pulse ready!');
+  updateHUD();
+}
+
+function activatePowerup(index){
+  activePowerup = {type: earnedPowerups[index], index};
+  showMessage(`Select target for ${activePowerup.type==='cluster'?'Cluster Bomb':'Sonar Pulse'}`);
+}
+
+function useClusterBomb(row,col){
+  const targets=[];
+  for(let dr=-1;dr<=1;dr++){
+    for(let dc=-1;dc<=1;dc++){
+      const r=row+dr,c=col+dc;
+      if(r>=0&&r<BOARD_SIZE&&c>=0&&c<BOARD_SIZE){
+        if(!enemyBoard[r][c].hit && !enemyBoard[r][c].miss){
+          targets.push({r,c});
+        }
+      }
+    }
+  }
+  let i=0;
+  function next(){
+    if(i<targets.length){
+      const {r,c}=targets[i++];
+      animateMissile(playerBoard[BOARD_SIZE-1][0].cellElem, enemyBoard[r][c].cellElem, ()=>{
+        fireAtCell(enemyBoard, aiBoard, aiShips, r, c, true);
+        setTimeout(next,200);
+      });
+    } else {
+      if(areAllShipsSunk(aiBoard)){ endGame(true); } else { setTurnIndicator("AI's Turn"); setTimeout(aiAttackPlayer,500); }
+    }
+  }
+  next();
+}
+
+function useSonarPulse(row,col){
+  const cells=[];
+  for(let dr=-1;dr<=1;dr++){
+    for(let dc=-1;dc<=1;dc++){
+      const r=row+dr,c=col+dc;
+      if(r>=0&&r<BOARD_SIZE&&c>=0&&c<BOARD_SIZE){
+        cells.push({r,c});
+        const el=enemyBoard[r][c].cellElem;
+        const mk=document.createElement('div');
+        mk.className='scan-mark';
+        mk.textContent=enemyBoard[r][c].hasShip?'🚢':'❌';
+        el.appendChild(mk);
+        mk.addEventListener('animationend',()=>mk.remove());
+      }
+    }
+  }
+  setTimeout(()=>{ if(areAllShipsSunk(aiBoard)){ endGame(true); } else { setTurnIndicator("AI's Turn"); setTimeout(aiAttackPlayer,500); } }, 850);
+}
+
 // --- Example HUD and Log Functions ---
 function updateHUD() {
   // You'll need to implement actual counting logic for your game state!
@@ -1834,13 +1934,14 @@ function updateHUD() {
     const pwrap = document.getElementById('powerups');
     if(pwrap){
       pwrap.innerHTML = '';
-      const icons = Math.floor(countPlayerHits()/3);
-      for(let i=0;i<icons;i++){
+      earnedPowerups.forEach((p,idx)=>{
         const span=document.createElement('span');
         span.className='power-icon';
-        span.textContent='💡';
+        span.textContent = p==='cluster'?'💣':'📡';
+        span.title = p==='cluster'?'Cluster Bomb':'Sonar Pulse';
+        span.onclick=()=>activatePowerup(idx);
         pwrap.appendChild(span);
-      }
+      });
     }
 }
 
