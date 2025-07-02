@@ -6,6 +6,10 @@
       ========================= -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
   <title>Battleship Ultra</title>
   
   <!-- =========================
@@ -17,12 +21,13 @@
     /* === GLOBAL RESET === */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Roboto", Arial, sans-serif;
       background-color: #0f1b2b;
       color: #fff;
       padding: 20px;
     }
     h1 {
+    font-family: "Orbitron", "Segoe UI", Arial, sans-serif;
       margin-bottom: 10px;
       font-size: 3rem;
       color: #3fffd7;
@@ -127,19 +132,21 @@
       border-radius: 12px;
     }
     .control-panel button {
-      background: #11fdfe;
+      background: linear-gradient(135deg, #1de9ff, #00bcd4);
       border: none;
-      padding: 12px 36px;
+      padding: 12px 40px;
       margin: 0 12px;
-      color: #04313f;
-      font-weight: bold;
-      border-radius: 9px;
-      box-shadow: 0 2px 14px #1affff66;
+      color: #042630;
+      font-weight: 600;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px #00fff566;
+      font-size: 1.1rem;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, transform 0.15s;
     }
     .control-panel button:hover {
-      background: #0bcbcc;
+      background: linear-gradient(135deg, #00d4ff, #0099c3);
+      transform: translateY(-2px);
     }
     /* === MODALS/MENU OVERLAYS === */
     .menu-modal-show { display: flex !important; }
@@ -227,9 +234,9 @@ position: relative;   /* This is important for z-index to work! */
   display: inline-block;
   white-space: nowrap;
   min-width: 0;
-  font-size: 1rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .hud-turn-indicator {
@@ -354,23 +361,24 @@ z-index: 10;
   gap: 18px;
   margin-top: 28px;
 }
-
 .control-panel button {
-  margin: 0 12px;
-  padding: 10px 36px;
-  background: #11fdfe;
+  background: linear-gradient(135deg, #1de9ff, #00bcd4);
   border: none;
-  border-radius: 9px;
-  font-size: 1.06rem;
-  color: #04313f;
-  font-weight: bold;
-  box-shadow: 0 2px 14px #1affff66;
+  padding: 12px 40px;
+  margin: 0 12px;
+  color: #042630;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px #00fff566;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.15s;
 }
 .control-panel button:hover {
-  background: #0bcbcc;
+  background: linear-gradient(135deg, #00d4ff, #0099c3);
+  transform: translateY(-2px);
 }
+
 
 /* Responsive: Stacks on small screens */
 @media (max-width: 900px) {
@@ -577,10 +585,10 @@ pointer-events: none;
   <div id="hud-panel">
     <div id="hud-turn" class="hud-turn-indicator"></div>
     <div class="hud-stats">
-      <span id="hud-player-ships">Your Ships: 5</span>
-      <span id="hud-enemy-ships">Enemy Ships: 5</span>
-      <span id="hud-hits">Hits: 0</span>
-      <span id="hud-misses">Misses: 0</span>
+      <span id="hud-player-ships">🚢 5</span>
+      <span id="hud-enemy-ships">🛳 5</span>
+      <span id="hud-hits">🔥 0</span>
+      <span id="hud-misses">💦 0</span>
     </div>
     <div id="hud-last-move"></div>
   </div>
@@ -1433,10 +1441,10 @@ function toggleLogPanel() {
 function updateHUD() {
   // You'll need to implement actual counting logic for your game state!
   // Example for illustration:
-  document.getElementById('hud-player-ships').textContent = `Your Ships: ${playerShips.length}`;
-  document.getElementById('hud-enemy-ships').textContent = `Enemy Ships: ${aiShips.length}`;
-  document.getElementById('hud-hits').textContent = `Hits: ${countPlayerHits()}`;
-  document.getElementById('hud-misses').textContent = `Misses: ${countPlayerMisses()}`;
+    document.getElementById("hud-player-ships").textContent = `🚢 ${playerShips.length}`;
+    document.getElementById("hud-enemy-ships").textContent = `🛳 ${aiShips.length}`;
+    document.getElementById("hud-hits").textContent = `🔥 ${countPlayerHits()}`;
+    document.getElementById("hud-misses").textContent = `💦 ${countPlayerMisses()}`;
 }
 
 function setHUDTurn(turn) {
