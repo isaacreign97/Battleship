@@ -5,7 +5,11 @@
       HEAD: Meta & Page Settings
       ========================= -->
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="description" content="Play Battleship Ultra - now with animations" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;family=Orbitron:wght@400;700&amp;display=swap" rel="stylesheet">
   <title>Battleship Ultra</title>
   
   <!-- =========================
@@ -17,17 +21,31 @@
     /* === GLOBAL RESET === */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Roboto", Arial, sans-serif;
       background-color: #0f1b2b;
       color: #fff;
       padding: 20px;
     }
+    /* === THEME CLASSES === */
+    body.theme-navy { background-color: #001b36; }
+    body.theme-scifi { background-color: #0f1b2b; }
+    body.theme-pirate { background-color: #2b1a0f; }
+    body.theme-navy #starfield { background: radial-gradient(circle at center, #133b64, #010c1a); }
+    body.theme-scifi #starfield { background: linear-gradient(160deg, #233d6d 40%, #110b26 100%); }
+    body.theme-pirate #starfield { background: radial-gradient(circle at center, #3d2f1a, #150d07); }
+    body.theme-navy h1, body.theme-navy .grid-label { color: #1cdad7; }
+    body.theme-pirate h1, body.theme-pirate .grid-label { color: #ffbf00; }
     h1 {
+      font-family: "Orbitron", "Segoe UI", Arial, sans-serif;
       margin-bottom: 10px;
       font-size: 3rem;
-      color: #3fffd7;
-      text-shadow: 0 3px 22px #21a0a8cc, 0 1px 0 #0114;
       text-align: center;
+    }
+    .title-text {
+      background: linear-gradient(90deg, #3fffd7, #00ff88);
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 3px 22px #21a0a8cc, 0 1px 0 #0114;
     }
     h2, h3#turn-indicator, .grid-title {
       text-align: center;
@@ -55,46 +73,77 @@
       transition: flex-direction 0.3s ease;
     }
     .grid {
-      background: rgba(26, 42, 59, 0.75);
-      border-radius: 12px;
-      border: 1.5px solid #66e0ffaa;
-      box-shadow: 0 4px 18px #2ad8ff33, 0 0 6px #113c5a66 inset;
-      width: 300px;
-      height: 300px;
+      background: rgba(20, 40, 40, 0.55);
+      border-radius: 16px;
+      border: 1.5px solid #00e0a0aa;
+      box-shadow:
+        0 4px 18px #00ff8844,
+        0 0 6px #0a3b3b66 inset,
+        0 0 40px #00ff8844 inset;
+      width: min(40vmin, 360px);
+      height: min(40vmin, 360px);
       display: grid;
       grid-template-columns: repeat(11, 1fr);
       grid-template-rows: repeat(11, 1fr);
       gap: 2px;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(8px) brightness(1.05);
     }
     .cell {
-      background: rgba(34, 51, 68, 0.85);
+      background: linear-gradient(135deg, rgba(34,51,68,0.85), rgba(44,61,78,0.85));
       border: 1px solid #334455;
-      border-radius: 4px;
+      border-radius: 6px;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 1.2rem;
       min-width: 0;
       min-height: 0;
-      transition: background 0.25s;
+      transition: background 0.25s, transform 0.2s, box-shadow 0.2s;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 2px 5px #0005;
     }
+    .cell-icon {
+      pointer-events: none;
+      transition: transform 0.2s;
+    }
+    .ship .cell-icon { font-size: 1.1rem; }
     /* === BOARD LABELS === */
     .cell.label-cell { background: #112233; font-weight: bold; color: #3fffd7; }
     .cell.corner-cell { background: #19283e; }
     /* === SHIP PLACEMENT & STATUS === */
-    .ship-preview { background-color: #2efb89cc !important; }
+    .ship-preview { background-color: #50ffb6cc !important; }
     .bad-placement { background-color: #ff6961cc !important; }
-    .ship { background-color: #49a0ff; }
+    .ship {
+      background: linear-gradient(135deg, rgba(90,220,255,0.85), rgba(40,140,255,0.85));
+      border: 1px solid #80eaff;
+      box-shadow: inset 0 0 8px #80eaff55, 0 0 6px #2dfdff88;
+      backdrop-filter: brightness(1.25);
+    }
     .fade-in { animation: fadein 0.4s; }
     @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
     .fading-out { animation: fadeout 1.2s forwards; }
     @keyframes fadeout { from { opacity: 1; } to { opacity: 0.15; background: #d80; }}
-    .hit { background: #ff6464; }
-    .miss { background: #113a44; }
+    .hit { background: #ff6464; transition: background 0.3s; }
+    .miss { background: #113a44; transition: background 0.3s; }
     .salvo-selected { outline: 2px solid #fff9b4; background: #bbb820 !important; }
+    .cell:not(.label-cell):hover {
+      background-color: rgba(85, 120, 170, 0.35);
+      animation: cellBounce 0.6s infinite;
+    }
+    .cell:hover .cell-icon { animation: bounceUpDown 0.6s infinite; }
+    .cell:active { animation: clickDownUp 0.3s; }
+    .cell:active .cell-icon { animation: clickDownUp 0.3s; }
+      #enemy-board .cell:hover:not(.label-cell):not(.hit):not(.miss) {
+        cursor: crosshair;
+        background-color: rgba(75,110,175,0.3);
+      }
+      #enemy-board .cell:hover:not(.label-cell):not(.hit):not(.miss)::after {
+        content: "🎯";
+        position: absolute;
+        font-size: 1.2rem;
+        pointer-events: none;
+      }
     /* === ANIMATION ICONS === */
     .explosion, .splash, .missile {
       pointer-events: none;
@@ -111,6 +160,44 @@
     .splash { animation: splashAnim 0.6s; }
     @keyframes splashAnim { from { opacity: 1;} to { opacity: 0; transform: scale(1.3);}}
     .missile { font-size: 1.7rem; }
+    .attack-pulse {
+      position: absolute;
+      left: 0; top: 0; right: 0; bottom: 0;
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.65);
+      animation: attackPulse 0.6s ease-out forwards;
+    }
+    @keyframes attackPulse {
+      from { transform: scale(0.2); opacity: 0.8; }
+      to { transform: scale(1.2); opacity: 0; }
+    }
+
+    /* Reusable bounce animations */
+    @keyframes bounceUpDown {
+      0%,100% { transform: translateY(-2px); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes clickDownUp {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(2px); }
+      100% { transform: translateY(0); }
+    }
+    @keyframes cellBounce {
+      0%,100% { transform: scale(1.05) translateY(-2px); }
+      50% { transform: scale(1.05) translateY(-6px); }
+    }
+    .scan-mark {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      pointer-events: none;
+      animation: scanFade 0.8s forwards;
+    }
+    @keyframes scanFade { from {opacity:1;} to {opacity:0;} }
     /* === RESPONSIVE (STACK GRIDS ON MOBILE) === */
     @media screen and (max-width: 768px) and (orientation: portrait) {
       .grids-wrapper { flex-direction: column; align-items: center; }
@@ -127,20 +214,24 @@
       border-radius: 12px;
     }
     .control-panel button {
-      background: #11fdfe;
+      background: linear-gradient(135deg, #1de9ff, #00bcd4);
       border: none;
-      padding: 12px 36px;
+      padding: 12px 40px;
       margin: 0 12px;
-      color: #04313f;
-      font-weight: bold;
-      border-radius: 9px;
-      box-shadow: 0 2px 14px #1affff66;
+      color: #042630;
+      font-weight: 600;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px #00fff566;
+      font-size: 1.1rem;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, transform 0.15s, box-shadow 0.2s;
     }
     .control-panel button:hover {
-      background: #0bcbcc;
+      background: linear-gradient(135deg, #00d4ff, #0099c3);
+      box-shadow: 0 5px 15px #00fff544;
+      animation: bounceUpDown 0.6s infinite;
     }
+    .control-panel button:active { animation: clickDownUp 0.3s; }
     /* === MODALS/MENU OVERLAYS === */
     .menu-modal-show { display: flex !important; }
     .menu-modal, #main-menu { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f1b2bdc; z-index: 2000;}
@@ -151,8 +242,14 @@
     }
     .menu-visible { display: flex !important; }
     .menu-hidden { display: none !important; }
-    .modal-btn { margin: 10px; padding: 12px 32px; border-radius: 8px; background: #00ffff; color: #132437; border: none; font-weight: 700; font-size: 1.1rem;}
-    .modal-btn:hover { background: #00bbbb; }
+    .modal-btn { margin: 10px; padding: 12px 32px; border-radius: 8px; background: #00ffff; color: #132437; border: none; font-weight: 700; font-size: 1.1rem; transition: background 0.15s, transform 0.15s; }
+    .modal-btn:hover { background: #00bbbb; animation: bounceUpDown 0.6s infinite; }
+    .modal-btn:active { animation: clickDownUp 0.3s; }
+    /* Enhanced endgame styles */
+    #endgame-icon { font-size: 3rem; margin-bottom: 8px; }
+    #endgame-stats { margin: 10px 0; font-size: 1.1rem; text-align: center; }
+    #endgame-modal.victory .modal-box { background: #214d36; }
+    #endgame-modal.defeat .modal-box { background: #4b2b2b; }
     /* === MESSAGE AREAS === */
     #messages { min-height: 1.2em; text-align: center; font-size: 1.1rem; margin: 12px auto 0 auto; }
     #placement-hint { text-align: center; font-size: 1.15rem; color: #3fffd7; min-height: 1.2em; }
@@ -201,12 +298,14 @@ position: relative;   /* This is important for z-index to work! */
   max-width: 500px;
   height: 35px;
   font-size: 0.97rem;
-  background: rgba(20,38,55,0.92);
-  border-radius: 12px;
-  box-shadow: 0 2px 12px #21fff655;
-  padding: 6px 10px 3px 10px;
+  background: rgba(20,38,55,0.82);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px #21fff655;
+  padding: 6px 12px 4px 12px;
   border: 1px solid #00ffeebb;
   box-sizing: border-box;
+  backdrop-filter: blur(6px);
+  transition: background 0.3s, box-shadow 0.3s;
 }
 #hud-panel .hud-stats {
   line-height: 1.1;  
@@ -227,9 +326,9 @@ position: relative;   /* This is important for z-index to work! */
   display: inline-block;
   white-space: nowrap;
   min-width: 0;
-  font-size: 1rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .hud-turn-indicator {
@@ -247,6 +346,51 @@ position: relative;   /* This is important for z-index to work! */
   min-height: 1.2em;
   margin-top: 1px;
   font-style: italic;
+}
+#powerups {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+#powerups .power-icon {
+  animation: pulse 1.2s infinite;
+}
+#powerups .power-icon:hover { animation: bounceUpDown 0.6s infinite; }
+#powerups .power-icon:active { animation: clickDownUp 0.3s; }
+}
+@keyframes pulse {0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);}}
+
+/* --- Audio Control Styles --- */
+#audio-controls {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: rgba(20,38,55,0.92);
+  border: 1px solid #00ffeebb;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px #21fff633;
+  z-index: 1100;
+}
+#audio-controls button {
+  background: none;
+  border: none;
+  color: #bbfff6;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: color 0.2s, transform 0.2s;
+}
+#audio-controls button:hover {
+  color: #ffffff;
+  transform: scale(1.1);
+}
+#audio-controls input[type=range] {
+  width: 60px;
+  margin-left: 4px;
+  transition: opacity 0.3s;
 }
 
 /* --- Pull Down Action Log Styles --- */
@@ -285,7 +429,10 @@ position: relative;   /* This is important for z-index to work! */
   justify-content: center;
   gap: 7px;
   cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
 }
+#action-log-tab:hover { background: #215b68; animation: bounceUpDown 0.6s infinite; }
+#action-log-tab:active { animation: clickDownUp 0.3s; }
 
 #action-log-arrow {
   font-size: 1.2em;
@@ -336,15 +483,19 @@ z-index: 10;
   width: 225px;
   text-align: center;
   font-weight: bold;
-  color: #20fff6;
+  color: transparent;
+  background: linear-gradient(90deg, #20fff6, #00ff88);
+  -webkit-background-clip: text;
   font-size: 1.16rem;
   margin-bottom: 5px;
   letter-spacing: 1.5px;
+  text-shadow: 0 1px 6px #1fffd566;
 }
 
 .board-grid {
   margin: 0 8px;
-z-index: 10;
+  z-index: 10;
+  position: relative;
 }
 
 .control-panel {
@@ -353,24 +504,32 @@ z-index: 10;
   align-items: center;
   gap: 18px;
   margin-top: 28px;
+  background: rgba(25,40,62,0.8);
+  padding: 14px 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px #23e0ff33;
 }
-
 .control-panel button {
-  margin: 0 12px;
-  padding: 10px 36px;
-  background: #11fdfe;
+  background: linear-gradient(135deg, #1de9ff, #00bcd4);
   border: none;
-  border-radius: 9px;
-  font-size: 1.06rem;
-  color: #04313f;
-  font-weight: bold;
-  box-shadow: 0 2px 14px #1affff66;
+  padding: 12px 40px;
+  margin: 0 12px;
+  color: #042630;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px #00fff566;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.15s;
 }
 .control-panel button:hover {
-  background: #0bcbcc;
+  background: linear-gradient(135deg, #00d4ff, #0099c3);
+  animation: bounceUpDown 0.6s infinite;
 }
+.control-panel button:active {
+  animation: clickDownUp 0.3s;
+}
+
 
 /* Responsive: Stacks on small screens */
 @media (max-width: 900px) {
@@ -384,12 +543,77 @@ z-index: 10;
   .grid { width: 97vw; height: 97vw; max-width: 340px; max-height: 340px; }
 }
 
- #starfield {
+  #starfield {
     position: fixed; left:0; top:0; width:100vw; height:100vh;
     z-index: -1;
 pointer-events: none;
     background: linear-gradient(160deg, #233d6d 40%, #110b26 100%);
+    animation: starBreath 18s ease-in-out infinite;
   }
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    left: -25%;
+    top: -25%;
+    width: 150%;
+    height: 150%;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(100,180,255,0.07), transparent 70%);
+    animation: bgPulse 12s ease-in-out infinite;
+    z-index: -2;
+  }
+  body::after { animation-delay: 6s; }
+  @keyframes bgPulse {
+    0%,100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.1); opacity: 0.45; }
+  }
+  @keyframes starBreath {
+    0%,100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.03); opacity: 1; }
+  }
+  #intro-screen {
+    position: fixed;
+    left: 0; top: 0;
+    width: 100vw; height: 100vh;
+    display: flex;
+    align-items: center; justify-content: center;
+    background: radial-gradient(circle at center, rgba(25,40,62,0.95), #0f1b2b);
+    z-index: 2002;
+    flex-direction: column;
+    color: #aee7ff;
+    font-family: 'Orbitron', 'Segoe UI', Arial, sans-serif;
+    animation: fadeInBG 1.2s cubic-bezier(.13,.84,.37,1);
+  }
+  #intro-screen.hide {
+    animation: fadeOutIntro 1s forwards;
+  }
+  @keyframes fadeOutIntro { to { opacity:0; visibility: hidden; } }
+  #intro-screen button {
+    margin-top: 28px;
+    padding: 14px 36px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg,#1de9ff,#00bcd4);
+    color:#042630;
+    font-size:1.2rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  #intro-screen button:hover { animation: bounceUpDown 0.6s infinite; }
+  #intro-screen button:active { animation: clickDownUp 0.3s; }
+  #enemy-board .radar-sweep {
+    z-index: 5;
+    pointer-events: none;
+    position: absolute;
+    left:0; top:0;
+    width:100%; height:100%;
+    border-radius: 12px;
+    background: conic-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0) 80%);
+    animation: radar 2s linear infinite;
+    mix-blend-mode: overlay;
+  }
+  @keyframes radar { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
   .halo-menu {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; z-index: 1001;
@@ -452,8 +676,48 @@ pointer-events: none;
     width: 310px; display: flex; flex-direction: row; gap: 18px; margin-bottom: 0;
     flex-wrap: wrap; justify-content: center;
   }
-  .halo-menu-options + .halo-menu-options { margin-top: 6px; }
-  .halo-btn {
+.halo-menu-options + .halo-menu-options { margin-top: 6px; }
+.halo-select {
+  min-width: 180px;
+  font-size: 1.05rem;
+  color: #e9fcff;
+  background: rgba(70,113,188,0.10);
+  border: 2px solid #3ec3ff33;
+  padding: 11px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 2.5px 10px #18e5f911;
+  transition: box-shadow 0.18s, background 0.16s, border 0.19s, color 0.18s, transform 0.12s;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23e9fcff' d='M0 0L5 6L10 0Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+.halo-select:hover, .halo-select:focus {
+  color: #57c1ff;
+  background: rgba(56,127,255,0.17);
+  border-color: #51f6ff;
+  box-shadow: 0 5px 34px #2ad8ff44, 0 2px 18px #27c7f1bb;
+  transform: scale(1.048) translateY(-2px);
+  animation: bounceUpDown 0.6s infinite;
+  outline: none;
+}
+.halo-select:active {
+  transform: scale(0.98);
+  animation: clickDownUp 0.3s;
+}
+.halo-select.open {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23e9fcff' d='M0 6L5 0L10 6Z'/%3E%3C/svg%3E");
+  animation: dropdownOpen 0.3s;
+}
+@keyframes dropdownOpen {
+  0% { transform: scale(0.96); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.halo-btn {
     min-width: 92px;
     font-size: 1.09rem;
     color: #e9fcff;
@@ -477,9 +741,14 @@ pointer-events: none;
     background: rgba(56,127,255,0.17);
     border-color: #51f6ff;
     box-shadow: 0 5px 34px #2ad8ff44, 0 2px 18px #27c7f1bb;
-    transform: scale(1.048);
+    transform: scale(1.048) translateY(-2px);
+    animation: bounceUpDown 0.6s infinite;
     outline: none;
     z-index: 1;
+  }
+  .halo-btn:active {
+    transform: scale(0.98);
+    animation: clickDownUp 0.3s;
   }
   .halo-btn::after {
     content: "";
@@ -500,26 +769,41 @@ pointer-events: none;
     opacity: 0.93;
     user-select: none;
   }
-  @media (max-width: 650px) {
-    .halo-menu-box { min-width: 0; width: 98vw; padding: 7vw 3vw; }
-    .halo-title { font-size: 2.1rem; }
-    .halo-menu-options { width: 96vw; }
-  }
+@media (max-width: 650px) {
+  .halo-menu-box { min-width: 0; width: 98vw; padding: 7vw 3vw; }
+  .halo-title { font-size: 2.1rem; }
+  .halo-menu-options { width: 96vw; }
+}
+@media (max-width: 480px) {
+  .grid { width: 94vw; height: 94vw; }
+  .halo-menu-box { width: 95vw; padding: 8vw 4vw; }
+  body { font-size: 14px; }
+}
+
 
 
   </style>
 </head>
 <body>
+  <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto" loop></audio>
+  <audio id="hit-sound" src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3" preload="auto"></audio>
+
+  <div id="intro-screen">
+    <h1 class="title-text">Battleship Ultra</h1>
+    <button id="intro-start" aria-label="Enter game">Enter</button>
+  </div>
 
   <!-- =========================
       ENDGAME MODAL OVERLAY
       ========================= -->
   <div id="endgame-modal" class="menu-modal">
     <div class="modal-box">
+      <div id="endgame-icon"></div>
       <h2 id="endgame-title"></h2>
       <p id="endgame-message"></p>
-      <button id="endgame-restart" class="modal-btn">Restart</button>
-      <button id="endgame-mainmenu" class="modal-btn">Main Menu</button>
+      <div id="endgame-stats"></div>
+      <button id="endgame-restart" class="modal-btn" aria-label="Restart game">Restart</button>
+      <button id="endgame-mainmenu" class="modal-btn" aria-label="Return to main menu">Main Menu</button>
     </div>
   </div>
 
@@ -536,19 +820,31 @@ pointer-events: none;
     </div>
     <div class="halo-subtitle">Select Game Mode</div>
     <div class="halo-menu-options">
-      <button class="halo-btn" data-mode="classic" autofocus>Classic</button>
-      <button class="halo-btn" data-mode="salvo">Salvo</button>
+      <select id="mode-select" class="halo-select" aria-label="Game mode">
+        <option value="classic" selected>Classic</option>
+        <option value="salvo">Salvo</option>
+      </select>
     </div>
     <div class="halo-subtitle" style="margin-top:18px;">AI Difficulty</div>
     <div class="halo-menu-options">
-      <button class="halo-btn" data-diff="easy">Easy</button>
-      <button class="halo-btn" data-diff="medium">Medium</button>
-      <button class="halo-btn" data-diff="hard">Hard</button>
-      <button class="halo-btn" data-diff="advanced">Advanced</button>
-      <button class="halo-btn" data-diff="god">God</button>
+      <select id="diff-select" class="halo-select" aria-label="AI difficulty">
+        <option value="easy" selected>Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+        <option value="advanced">Advanced</option>
+        <option value="god">God</option>
+      </select>
+    </div>
+    <div class="halo-subtitle" style="margin-top:18px;">Theme</div>
+    <div class="halo-menu-options">
+      <select id="theme-select" class="halo-select" aria-label="Theme">
+        <option value="navy" selected>Navy</option>
+        <option value="scifi">Sci-Fi</option>
+        <option value="pirate">Pirate</option>
+      </select>
     </div>
     <div style="margin:30px 0 8px 0;">
-      <button class="halo-btn halo-btn-big" id="menu-start">Start Game</button>
+      <button class="halo-btn halo-btn-big" id="menu-start" aria-label="Start game">Start Game</button>
     </div>
     <div class="halo-footer">&copy; 2025 Isaac's Game Studio – Inspired by Halo 3 UI</div>
   </div>
@@ -558,18 +854,19 @@ pointer-events: none;
       MAIN GAME CONTAINER (hidden by default)
       ========================= -->
   <div id="game-container" style="display: flex;">
-<h1>Battleship Ultra</h1>
+<h1 class="title-text">Battleship Ultra</h1>
   <h3 id="turn-indicator"></h3>
-  <div id="messages"></div>
+  <div id="messages" role="status" aria-live="polite"></div>
     <!-- === SHIP PLACEMENT CONTROLS === -->
     <div id="main-controls" style="display: none; flex-direction: column; align-items: center; width: 100%;">
       <div id="placement-controls">
         <label>Ship:
           <select id="ship-select"></select>
         </label>
-        <button id="toggle-orientation">Horizontal</button>
+        <button id="toggle-orientation" aria-label="Toggle ship orientation">Horizontal</button>
         <span id="placement-hint"></span>
       </div>
+    </div>
 <!-- ======================
      HUD PANEL + ACTION LOG
      ====================== -->
@@ -577,11 +874,12 @@ pointer-events: none;
   <div id="hud-panel">
     <div id="hud-turn" class="hud-turn-indicator"></div>
     <div class="hud-stats">
-      <span id="hud-player-ships">Your Ships: 5</span>
-      <span id="hud-enemy-ships">Enemy Ships: 5</span>
-      <span id="hud-hits">Hits: 0</span>
-      <span id="hud-misses">Misses: 0</span>
+      <span id="hud-player-ships">🚢 5</span>
+      <span id="hud-enemy-ships">🛳 5</span>
+      <span id="hud-hits">🔥 0</span>
+      <span id="hud-misses">💦 0</span>
     </div>
+    <div id="powerups" aria-label="Power ups"></div>
     <div id="hud-last-move"></div>
   </div>
   <div id="action-log-panel" class="collapsed">
@@ -599,19 +897,29 @@ pointer-events: none;
 <div class="grids-row">
   <div>
     <div class="grid-label">YOUR FLEET</div>
-    <div id="player-board" class="board-grid"></div>
+    <div id="player-board" class="board-grid" role="grid" aria-label="Your fleet"></div>
   </div>
   <div>
     <div class="grid-label">OPPONENT FLEET</div>
-    <div id="enemy-board" class="board-grid"></div>
+    <div id="enemy-board" class="board-grid" role="grid" aria-label="Opponent fleet"></div>
   </div>
 </div>
 
 <!-- Control Buttons (below boards) -->
 <div class="control-panel">
-  <button id="restart-game">Restart</button>
-  <button id="go-main-menu">Main Menu</button>
-  <button id="confirm-salvo" style="display: none;">Confirm Shots</button>
+  <button id="restart-game" aria-label="Restart game">Restart</button>
+  <button id="go-main-menu" aria-label="Return to main menu">Main Menu</button>
+  <button id="confirm-salvo" aria-label="Confirm salvo shots" style="display: none;">Confirm Shots</button>
+</div>
+<!-- Floating audio controls -->
+<div id="audio-controls" aria-label="Audio controls">
+  <button id="toggle-mute" aria-label="Mute or unmute sound">🔊</button>
+  <label style="font-size:0.85rem;">Music
+    <input id="music-volume" type="range" min="0" max="1" step="0.05" value="0.5"/>
+  </label>
+  <label style="font-size:0.85rem;">SFX
+    <input id="sfx-volume" type="range" min="0" max="1" step="0.05" value="1"/>
+  </label>
 </div>
     </div>
 
@@ -625,13 +933,16 @@ pointer-events: none;
   // Why: Define all fixed values, ships, and global state needed throughout game
 const mode = window.selectedMode || 'classic';
 const difficulty = window.selectedDiff || 'easy';
+const theme = localStorage.getItem('bs-theme') || window.selectedTheme || 'navy';
+applyTheme(theme);
+window.selectedTheme = theme;
   const BOARD_SIZE = 10;
   const SHIPS = [
-    { name: "Carrier", size: 5 },
-    { name: "Battleship", size: 4 },
-    { name: "Cruiser", size: 3 },
-    { name: "Submarine", size: 3 },
-    { name: "Destroyer", size: 2 },
+    { name: "Carrier", size: 5, icon: "🛳" },
+    { name: "Battleship", size: 4, icon: "🚢" },
+    { name: "Cruiser", size: 3, icon: "🚤" },
+    { name: "Submarine", size: 3, icon: "🛥" },
+    { name: "Destroyer", size: 2, icon: "⛵" },
   ];
 
   // Main game state (reset in restartGame)
@@ -647,7 +958,65 @@ const difficulty = window.selectedDiff || 'easy';
   let playerShips = [];
   let gameMode = 'classic';
   let pendingPlayerShots = [];
-  const confirmSalvoBtn = document.getElementById('confirm-salvo');
+  let hoveredCell = null; // Track which board cell is under the mouse
+  let earnedPowerups = [];
+  let activePowerup = null;
+  let hitsForPower = 3;
+  const powerTypes = ['cluster','sonar'];
+  let nextPowerupIndex = 0;
+const bgMusic = document.getElementById('bg-music');
+const hitSound = document.getElementById('hit-sound');
+const muteBtn = document.getElementById('toggle-mute');
+const musicSlider = document.getElementById('music-volume');
+const sfxSlider = document.getElementById('sfx-volume');
+let audioMuted = localStorage.getItem('bs-muted') === 'true';
+if(musicSlider){
+  const mv = localStorage.getItem('bs-music-vol');
+  if(mv !== null) musicSlider.value = mv;
+}
+if(sfxSlider){
+  const sv = localStorage.getItem('bs-sfx-vol');
+  if(sv !== null) sfxSlider.value = sv;
+}
+const confirmSalvoBtn = document.getElementById('confirm-salvo');
+// Fire all selected salvo shots when the confirm button is clicked
+confirmSalvoBtn.onclick = () => {
+  confirmSalvoBtn.style.display = 'none';
+  applyPlayerSalvoShots();
+};
+
+// --- Audio Control Handlers ---
+function updateMuteIcon() {
+  muteBtn.textContent = audioMuted ? '🔈' : '🔊';
+}
+muteBtn.onclick = () => {
+  audioMuted = !audioMuted;
+  if(bgMusic) bgMusic.muted = audioMuted;
+  if(hitSound) hitSound.muted = audioMuted;
+  localStorage.setItem('bs-muted', audioMuted);
+  updateMuteIcon();
+}; 
+if(musicSlider){
+  const applyMusicVolume = () => { if(bgMusic) bgMusic.volume = parseFloat(musicSlider.value); };
+  const setMusicVol = () => { applyMusicVolume(); localStorage.setItem('bs-music-vol', musicSlider.value); };
+  setMusicVol();
+  musicSlider.addEventListener('input', setMusicVol);
+}
+if(sfxSlider){
+  const applySfxVolume = () => { if(hitSound) hitSound.volume = parseFloat(sfxSlider.value); };
+  const setSfxVol = () => { applySfxVolume(); localStorage.setItem('bs-sfx-vol', sfxSlider.value); };
+  setSfxVol();
+  sfxSlider.addEventListener('input', setSfxVol);
+}
+updateMuteIcon();
+
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden) {
+    if(bgMusic) bgMusic.pause();
+  } else {
+    if(bgMusic && !audioMuted) bgMusic.play().catch(()=>{});
+  }
+});
 
   /* ==============================
      ANIMATION FUNCTIONS
@@ -694,6 +1063,8 @@ const difficulty = window.selectedDiff || 'easy';
     exp.style.position = 'fixed';
     document.body.appendChild(exp);
     exp.addEventListener('animationend', () => exp.remove());
+    showPulse(targetElem);
+    if(hitSound){ hitSound.currentTime = 0; hitSound.play().catch(()=>{}); }
   }
 
   // Show splash effect for misses
@@ -707,8 +1078,15 @@ const difficulty = window.selectedDiff || 'easy';
     splash.style.position = 'fixed';
     document.body.appendChild(splash);
     splash.addEventListener('animationend', () => splash.remove());
+    showPulse(targetElem);
+    if(hitSound){ hitSound.currentTime = 0; hitSound.play().catch(()=>{}); }
   }
-
+  function showPulse(targetElem) {
+    const ring = document.createElement('div');
+    ring.className = 'attack-pulse';
+    targetElem.appendChild(ring);
+    ring.addEventListener('animationend', () => ring.remove());
+  }
   // Fade out a sunk ship’s cells
   function fadeOutShip(cellElem) {
     cellElem.classList.add('fading-out');
@@ -731,7 +1109,12 @@ const difficulty = window.selectedDiff || 'easy';
   // 1. Clear and ensure grid styling
   const boardDiv = document.getElementById(boardId);
   boardDiv.innerHTML = '';
-  boardDiv.className = 'grid board-grid'; // FIX: ensure correct CSS
+  boardDiv.className = 'grid board-grid';
+  let radar;
+  if(!isPlayer){
+    radar = document.createElement('div');
+    radar.className = 'radar-sweep';
+  }
 
   // 2. Build 11x11 grid (first row/col = labels)
   for (let r = 0; r <= BOARD_SIZE; r++) {
@@ -750,20 +1133,33 @@ const difficulty = window.selectedDiff || 'easy';
         cell.dataset.row = r - 1;
         cell.dataset.col = c - 1;
         cell.innerHTML = '<span class="cell-icon"></span>';
+        cell.tabIndex = 0;
+        cell.setAttribute('role','gridcell');
+        cell.setAttribute('aria-label', `${String.fromCharCode(64+r)}${c}`);
+        // Track hover for keyboard firing/placement
+        cell.addEventListener('mouseenter', () => { hoveredCell = cell; });
+        cell.addEventListener('mouseleave', () => { if(hoveredCell === cell) hoveredCell = null; });
         // Hook up correct event handlers
         if (isPlayer) {
           playerBoard[r - 1][c - 1].cellElem = cell;
           cell.addEventListener('mouseenter', handleCellHover);
           cell.addEventListener('mouseleave', handleCellUnhover);
           cell.addEventListener('click', handleCellPlace);
+          cell.addEventListener('keydown', e => {
+            if(e.key==='Enter' || e.key===' ') { e.preventDefault(); handleCellPlace(e); }
+          });
         } else {
           enemyBoard[r - 1][c - 1].cellElem = cell;
           cell.addEventListener('click', handleTargetClick);
+          cell.addEventListener('keydown', e => {
+            if(e.key==='Enter' || e.key===' ') { e.preventDefault(); handleTargetClick(e); }
+          });
         }
       }
       boardDiv.appendChild(cell);
     }
   }
+  if(!isPlayer && radar) boardDiv.appendChild(radar);
 }
 
   /* ==============================
@@ -776,7 +1172,7 @@ const difficulty = window.selectedDiff || 'easy';
     shipsToPlace.forEach((ship, idx) => {
       const opt = document.createElement('option');
       opt.value = idx;
-      opt.textContent = `${ship.name} (${ship.size})`;
+      opt.textContent = `${ship.icon} ${ship.name} (${ship.size})`;
       shipSelect.appendChild(opt);
     });
     shipSelect.disabled = shipsToPlace.length === 0;
@@ -784,19 +1180,20 @@ const difficulty = window.selectedDiff || 'easy';
       currentShipIndex = parseInt(e.target.value);
       showPlacementHint();
     };
-    document.getElementById('toggle-orientation').onclick = () => {
-      placementOrientation = (placementOrientation === 'horizontal') ? 'vertical' : 'horizontal';
-      document.getElementById('toggle-orientation').textContent =
-        placementOrientation.charAt(0).toUpperCase() + placementOrientation.slice(1);
-      showPlacementHint();
-    };
+  document.getElementById('toggle-orientation').onclick = () => {
+    placementOrientation = (placementOrientation === 'horizontal') ? 'vertical' : 'horizontal';
+    document.getElementById('toggle-orientation').textContent =
+      placementOrientation.charAt(0).toUpperCase() + placementOrientation.slice(1);
     showPlacementHint();
-  }
+  };
+  showPlacementHint();
+}
 
   // Updates placement hint text
   function showPlacementHint() {
     if (shipsToPlace.length > 0) {
-      const hint = `Placing: ${shipsToPlace[currentShipIndex].name} (${shipsToPlace[currentShipIndex].size}) - ${placementOrientation}`;
+      const ship = shipsToPlace[currentShipIndex];
+      const hint = `Placing: ${ship.icon} ${ship.name} (${ship.size}) - ${placementOrientation}`;
       document.getElementById('placement-hint').textContent = hint;
     } else {
       document.getElementById('placement-hint').textContent = '';
@@ -819,6 +1216,7 @@ const difficulty = window.selectedDiff || 'easy';
 
   // Preview ship placement on hover
   function handleCellHover(e) {
+    hoveredCell = e.target;
     if (shipsPlaced || shipsToPlace.length === 0) return;
     const row = parseInt(e.target.dataset.row);
     const col = parseInt(e.target.dataset.col);
@@ -838,6 +1236,7 @@ const difficulty = window.selectedDiff || 'easy';
 
   // Remove preview when mouse leaves cell
   function handleCellUnhover(e) {
+    if(hoveredCell === e.target) hoveredCell = null;
     if (shipsToPlace.length === 0) return;
     const row = parseInt(e.target.dataset.row);
     const col = parseInt(e.target.dataset.col);
@@ -858,7 +1257,7 @@ const difficulty = window.selectedDiff || 'easy';
     const col = parseInt(e.target.dataset.col);
     const ship = shipsToPlace[currentShipIndex];
     if (!canPlaceShip(row, col, ship.size, placementOrientation)) {
-      showMessage("Invalid placement. Try again.");
+      showMessage("Position denied. Choose a valid location.");
       return;
     }
     let newShip = { name: ship.name, positions: [] };
@@ -867,6 +1266,7 @@ const difficulty = window.selectedDiff || 'easy';
       let c = col + (placementOrientation === 'horizontal' ? i : 0);
       playerBoard[r][c].hasShip = true;
       playerBoard[r][c].cellElem.classList.add('ship');
+      setCellIcon(playerBoard[r][c].cellElem, ship.icon);
       fadeInShip(playerBoard[r][c].cellElem); // Placement animation
       playerBoard[r][c].cellElem.classList.remove('ship-preview', 'bad-placement');
       newShip.positions.push({ r, c });
@@ -878,11 +1278,11 @@ const difficulty = window.selectedDiff || 'easy';
     if (shipsToPlace.length === 0) {
   document.getElementById('placement-controls').style.display = 'none';
   shipsPlaced = true;
-      showMessage('All ships placed! Begin attacks.');
+      showMessage('All ships deployed. Awaiting firing orders.');
       setTurnIndicator("Your Turn");
       if (gameMode === "salvo") {
         pendingPlayerShots = [];
-        showMessage(`Your turn! Select ${countUnsunkShips(playerShips, playerBoard)} shots.`);
+        showMessage(`Your move, Commander. Allocate ${countUnsunkShips(playerShips, playerBoard)} salvo${countUnsunkShips(playerShips, playerBoard) > 1 ? 's' : ''}.`);
       }
     } else {
       setupPlacementControls();
@@ -987,11 +1387,22 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
       setCellIcon(boardToUpdate[row][col].cellElem, '💥');
       showExplosion(boardToUpdate[row][col].cellElem);
       logAction(`${isPlayer ? 'Player' : 'AI'} hit at ${rowLabel}${colLabel}`, isPlayer ? "log-player" : "log-ai");
+      if(isPlayer){
+        hitsForPower--;
+        if(hitsForPower<=0){
+          grantPowerup();
+          hitsForPower = 3;
+        }
+      }
       if (isShipSunk(enemyShips, row, col, enemyBoard)) {
         let name = markSunkShip(enemyShips, enemyBoard, boardToUpdate, row, col);
-        showMessage((isPlayer ? "You sank" : "AI sank") + ` the ${isPlayer ? "AI's" : "your"} ${name}!`);
+        if(isPlayer) {
+          showMessage(`Target neutralized! Enemy ${name} destroyed.`);
+        } else {
+          showMessage(`Our ${name} has been sunk!`);
+        }
       } else {
-        showMessage(isPlayer ? "You hit an AI ship!" : "AI hit your ship!");
+        showMessage(isPlayer ? "Direct hit on enemy vessel!" : "Enemy shot landed on our ship!");
         logAction(`${isPlayer ? "You" : "AI"} sunk a ship!`, "log-sink");
       }
     } else {
@@ -1000,7 +1411,7 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
       boardToUpdate[row][col].miss = true;
       enemyBoard[row][col].miss = true;
       showSplash(boardToUpdate[row][col].cellElem);
-      showMessage(isPlayer ? "You missed!" : "AI missed!");
+      showMessage(isPlayer ? "Shot missed the target." : "Enemy shot fell short.");
       logAction(`${isPlayer ? 'Player' : 'AI'} missed at ${rowLabel}${colLabel}`, isPlayer ? "log-player" : "log-ai");
     }
      updateHUD();
@@ -1016,6 +1427,20 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
     // Don’t allow repeat shots
     if (enemyBoard[row][col].hit || enemyBoard[row][col].miss) return;
 
+    if(activePowerup){
+      const type = activePowerup.type;
+      const idx = activePowerup.index;
+      earnedPowerups.splice(idx,1);
+      activePowerup = null;
+      updateHUD();
+      if(type==='cluster') {
+        useClusterBomb(row,col);
+      } else {
+        useSonarPulse(row,col);
+      }
+      return;
+    }
+
     if (gameMode === 'salvo') {
       const shotsAllowed = countUnsunkShips(playerShips, playerBoard);
 
@@ -1025,7 +1450,7 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
         e.target.classList.remove('salvo-selected');
       } else {
         if (pendingPlayerShots.length >= shotsAllowed) {
-          showMessage(`You can only select ${shotsAllowed} shot${shotsAllowed > 1 ? 's' : ''} per turn.`);
+          showMessage(`Limit reached: ${shotsAllowed} salvo${shotsAllowed > 1 ? 's' : ''} max.`);
           return;
         }
         pendingPlayerShots.push({ r: row, c: col });
@@ -1039,9 +1464,9 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
         confirmSalvoBtn.style.display = 'none';
       }
       if (pendingPlayerShots.length < shotsAllowed) {
-        showMessage(`Select ${shotsAllowed - pendingPlayerShots.length} more shot${shotsAllowed - pendingPlayerShots.length > 1 ? 's' : ''}.`);
+        showMessage(`Select ${shotsAllowed - pendingPlayerShots.length} more coordinate${shotsAllowed - pendingPlayerShots.length > 1 ? 's' : ''}.`);
       } else if (pendingPlayerShots.length === shotsAllowed) {
-        showMessage(`Click "Confirm Shots" to fire!`);
+        showMessage(`Press \"Confirm Shots\" to open fire.`);
       }
       return;
     }
@@ -1139,7 +1564,7 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
         return;
       }
       setTurnIndicator("Your Turn");
-      showMessage("Your turn! Take a shot!");
+      showMessage("Your turn, Commander. Fire when ready!");
     }, true); // ROTATE AI MISSILE!
   }
 
@@ -1189,7 +1614,7 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
         }, true); // ROTATE AI MISSILE!
       } else {
 setTurnIndicator("Your Turn");
-        showMessage(`Your turn! Select ${countUnsunkShips(playerShips, playerBoard)} shot(s).`);
+        showMessage(`Commander, select ${countUnsunkShips(playerShips, playerBoard)} target${countUnsunkShips(playerShips, playerBoard) > 1 ? 's' : ''}.`);
       }
     }
     aiDoNextShot();
@@ -1200,7 +1625,7 @@ setTurnIndicator("Your Turn");
      ============================== */
   // Show a message to the player
   function showMessage(msg) {
-    document.getElementById('messages').textContent = msg;
+    document.getElementById('messages').textContent = `STATUS: ${msg}`;
   }
   function randomInt(max) { return Math.floor(Math.random() * max); }
 
@@ -1247,19 +1672,38 @@ setTurnIndicator("Your Turn");
      MAIN MENU & GAME OVER MODALS
      ============================== */
   function showEndgameModal(win) {
-    document.getElementById("endgame-title").textContent = win ? "You Win! 🎉" : "You Lose 😢";
+    const modal = document.getElementById("endgame-modal");
+    modal.classList.add("menu-modal-show");
+    modal.classList.toggle("victory", win);
+    modal.classList.toggle("defeat", !win);
+    document.getElementById("endgame-title").textContent = win ? "Victory!" : "Defeat";
+    document.getElementById("endgame-icon").textContent = win ? "🎉" : "💀";
     document.getElementById("endgame-message").textContent = win
       ? "Congratulations, Admiral!" : "The enemy fleet prevailed. Try again!";
-    document.getElementById("endgame-modal").classList.add("menu-modal-show");
+    const hits = countPlayerHits();
+    const misses = countPlayerMisses();
+    const total = hits + misses;
+    const acc = total ? Math.round((hits / total) * 100) : 0;
+    document.getElementById("endgame-stats").textContent = `Hits: ${hits} • Misses: ${misses} • Accuracy: ${acc}%`;
+    if(bgMusic) bgMusic.pause();
   }
   function hideEndgameModal() {
-    document.getElementById("endgame-modal").classList.remove("menu-modal-show");
+    const modal = document.getElementById("endgame-modal");
+    modal.classList.remove("menu-modal-show", "victory", "defeat");
+    if(bgMusic && document.getElementById('main-menu').style.display === 'flex') {
+      bgMusic.volume = parseFloat(musicSlider.value);
+      if(!audioMuted) bgMusic.play().catch(()=>{});
+    }
   }
   function showMainMenu() {
-  document.getElementById("main-menu").style.display = "flex";
-  document.getElementById("game-container").style.display = "none";
-  hideEndgameModal();
-}
+    document.getElementById("main-menu").style.display = "flex";
+    document.getElementById("game-container").style.display = "none";
+    hideEndgameModal();
+    if(bgMusic) {
+      bgMusic.volume = parseFloat(musicSlider.value);
+      if(!audioMuted) bgMusic.play().catch(()=>{});
+    }
+  }
   
   /* ==============================
      FULL GAME RESET/RESTART
@@ -1272,6 +1716,10 @@ function restartGame() {
   playerShips = [];
   aiShips = [];
   pendingPlayerShots = [];
+  earnedPowerups = [];
+  activePowerup = null;
+  hitsForPower = 3;
+  nextPowerupIndex = 0;
   // Set up boards
   playerBoard = [];
   for (let r = 0; r < BOARD_SIZE; r++) {
@@ -1287,15 +1735,15 @@ function restartGame() {
       enemyBoard[r][c] = { hasShip: false, hit: false, miss: false, cellElem: null };
     }
   }
-  confirmSalvoBtn.style.display = 'none';  // <-- FIXED POSITION
+  confirmSalvoBtn.style.display = 'none';
 
   createEmbeddedLabeledBoard('player-board', true);
-  createEmbeddedLabeledBoard('enemy-board', false); // <-- FIXED ID HERE
+  createEmbeddedLabeledBoard('enemy-board', false);
   document.getElementById('main-controls').style.display = 'flex';
   document.getElementById('placement-controls').style.display = 'flex';
   setupPlacementControls();
   placeAIShips();
-  showMessage('Place your ships and start the game!');
+  showMessage('Deploy your fleet to commence battle.');
   setTurnIndicator('');
   hideEndgameModal();
   document.querySelectorAll('.salvo-selected').forEach(cell => cell.classList.remove('salvo-selected'));
@@ -1321,13 +1769,32 @@ function restartGame() {
   };
   // On page load: show menu and setup controls
   window.onload = function() {
+    document.getElementById('intro-screen').style.display = 'flex';
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('game-container').style.display = 'none';
+  };
+  document.getElementById('intro-start').onclick = function(){
+    document.getElementById('intro-screen').classList.add('hide');
     showMainMenu();
     restartGame();
   };
-  confirmSalvoBtn.onclick = function() {
-    confirmSalvoBtn.style.display = 'none';
-    applyPlayerSalvoShots();
-  };
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && confirmSalvoBtn.style.display !== 'none') {
+      confirmSalvoBtn.click();
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if(e.key.toLowerCase() === 'r' && document.getElementById('main-controls').style.display !== 'none') {
+      e.preventDefault();
+      document.getElementById('toggle-orientation').click();
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if((e.key === 'Enter' || e.key === ' ') && hoveredCell && confirmSalvoBtn.style.display === 'none') {
+      e.preventDefault();
+      hoveredCell.click();
+    }
+  });
   // Starfield
   const canvas = document.getElementById('starfield');
   const ctx = canvas.getContext('2d');
@@ -1368,46 +1835,43 @@ function restartGame() {
   // --- HALO MENU LOGIC ---
   let selectedMode = 'classic';
   let selectedDiff = 'easy';
-  // Mode buttons
-  document.querySelectorAll('.halo-btn[data-mode]').forEach((btn, idx, arr) => {
-    btn.onclick = () => {
-      arr.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedMode = btn.getAttribute('data-mode');
-    };
-    // Default: classic active
-    if(idx===0) btn.classList.add('active');
-  });
-  // Diff buttons
-  document.querySelectorAll('.halo-btn[data-diff]').forEach((btn, idx, arr) => {
-    btn.onclick = () => {
-      arr.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedDiff = btn.getAttribute('data-diff');
-    };
-    // Default: easy active
-    if(idx===0) btn.classList.add('active');
+  let selectedTheme = 'navy';
+  applyTheme(selectedTheme);
+  // Dropdowns for menu selections
+  const modeSelect = document.getElementById('mode-select');
+  selectedMode = modeSelect.value;
+  modeSelect.onchange = () => { selectedMode = modeSelect.value; };
+
+  const diffSelect = document.getElementById('diff-select');
+  selectedDiff = diffSelect.value;
+  diffSelect.onchange = () => { selectedDiff = diffSelect.value; };
+
+  const themeSelect = document.getElementById('theme-select');
+  selectedTheme = themeSelect.value;
+  themeSelect.onchange = () => {
+    selectedTheme = themeSelect.value;
+    localStorage.setItem('bs-theme', selectedTheme);
+    applyTheme(selectedTheme);
+  };
+
+  document.querySelectorAll('.halo-select').forEach(sel => {
+    sel.addEventListener('mousedown', () => sel.classList.add('open'));
+    sel.addEventListener('blur', () => sel.classList.remove('open'));
   });
 
-  // Keyboard nav
-  const allBtns = Array.from(document.querySelectorAll('.halo-btn'));
-  let btnIndex = 0;
-  function updateBtnFocus(idx) {
-    allBtns.forEach((b,i)=>b.classList.toggle('active',i===idx));
-    allBtns[idx].focus();
+  function applyTheme(theme) {
+    document.body.classList.remove('theme-navy','theme-scifi','theme-pirate');
+    document.body.classList.add('theme-' + theme);
   }
-  document.addEventListener('keydown', e => {
-    if(document.getElementById('main-menu').style.display === 'none') return;
-    if(e.key==="ArrowDown"||e.key==="s") { btnIndex=(btnIndex+1)%allBtns.length; updateBtnFocus(btnIndex);}
-    if(e.key==="ArrowUp"||e.key==="w") { btnIndex=(btnIndex-1+allBtns.length)%allBtns.length; updateBtnFocus(btnIndex);}
-    if(e.key==="Enter"||e.key===" ") { allBtns[btnIndex].click(); }
-  });
+
+
 
   // Start Game button
   document.getElementById('menu-start').onclick = function() {
     // Set game mode & difficulty in your logic:
     window.selectedMode = selectedMode;
     window.selectedDiff = selectedDiff;
+    window.selectedTheme = selectedTheme;
     // Hide menu, show game (insert your code here)
     document.getElementById('main-menu').style.display = "none";
     // Example: Show the main game container
@@ -1418,6 +1882,7 @@ function restartGame() {
       // Assign selected mode/difficulty to your game's variables!
       gameMode = selectedMode;
       aiDifficulty = selectedDiff;
+      applyTheme(selectedTheme);
       restartGame();
     }
   };
@@ -1429,14 +1894,85 @@ function toggleLogPanel() {
   panel.classList.toggle('collapsed');
 }
 
+function grantPowerup(){
+  const type = powerTypes[nextPowerupIndex];
+  nextPowerupIndex = (nextPowerupIndex + 1) % powerTypes.length;
+  earnedPowerups.push(type);
+  showMessage(type==='cluster' ? 'Cluster Bomb ready!' : 'Sonar Pulse ready!');
+  updateHUD();
+}
+
+function activatePowerup(index){
+  activePowerup = {type: earnedPowerups[index], index};
+  showMessage(`Select target for ${activePowerup.type==='cluster'?'Cluster Bomb':'Sonar Pulse'}`);
+}
+
+function useClusterBomb(row,col){
+  const targets=[];
+  for(let dr=-1;dr<=1;dr++){
+    for(let dc=-1;dc<=1;dc++){
+      const r=row+dr,c=col+dc;
+      if(r>=0&&r<BOARD_SIZE&&c>=0&&c<BOARD_SIZE){
+        if(!enemyBoard[r][c].hit && !enemyBoard[r][c].miss){
+          targets.push({r,c});
+        }
+      }
+    }
+  }
+  let i=0;
+  function next(){
+    if(i<targets.length){
+      const {r,c}=targets[i++];
+      animateMissile(playerBoard[BOARD_SIZE-1][0].cellElem, enemyBoard[r][c].cellElem, ()=>{
+        fireAtCell(enemyBoard, aiBoard, aiShips, r, c, true);
+        setTimeout(next,200);
+      });
+    } else {
+      if(areAllShipsSunk(aiBoard)){ endGame(true); } else { setTurnIndicator("AI's Turn"); setTimeout(aiAttackPlayer,500); }
+    }
+  }
+  next();
+}
+
+function useSonarPulse(row,col){
+  const cells=[];
+  for(let dr=-1;dr<=1;dr++){
+    for(let dc=-1;dc<=1;dc++){
+      const r=row+dr,c=col+dc;
+      if(r>=0&&r<BOARD_SIZE&&c>=0&&c<BOARD_SIZE){
+        cells.push({r,c});
+        const el=enemyBoard[r][c].cellElem;
+        const mk=document.createElement('div');
+        mk.className='scan-mark';
+        mk.textContent=enemyBoard[r][c].hasShip?'🚢':'❌';
+        el.appendChild(mk);
+        mk.addEventListener('animationend',()=>mk.remove());
+      }
+    }
+  }
+  setTimeout(()=>{ if(areAllShipsSunk(aiBoard)){ endGame(true); } else { setTurnIndicator("AI's Turn"); setTimeout(aiAttackPlayer,500); } }, 850);
+}
+
 // --- Example HUD and Log Functions ---
 function updateHUD() {
   // You'll need to implement actual counting logic for your game state!
   // Example for illustration:
-  document.getElementById('hud-player-ships').textContent = `Your Ships: ${playerShips.length}`;
-  document.getElementById('hud-enemy-ships').textContent = `Enemy Ships: ${aiShips.length}`;
-  document.getElementById('hud-hits').textContent = `Hits: ${countPlayerHits()}`;
-  document.getElementById('hud-misses').textContent = `Misses: ${countPlayerMisses()}`;
+    document.getElementById("hud-player-ships").textContent = `🚢 ${playerShips.length}`;
+    document.getElementById("hud-enemy-ships").textContent = `🛳 ${aiShips.length}`;
+    document.getElementById("hud-hits").textContent = `🔥 ${countPlayerHits()}`;
+    document.getElementById("hud-misses").textContent = `💦 ${countPlayerMisses()}`;
+    const pwrap = document.getElementById('powerups');
+    if(pwrap){
+      pwrap.innerHTML = '';
+      earnedPowerups.forEach((p,idx)=>{
+        const span=document.createElement('span');
+        span.className='power-icon';
+        span.textContent = p==='cluster'?'💣':'📡';
+        span.title = p==='cluster'?'Cluster Bomb':'Sonar Pulse';
+        span.onclick=()=>activatePowerup(idx);
+        pwrap.appendChild(span);
+      });
+    }
 }
 
 function setHUDTurn(turn) {
@@ -1454,11 +1990,6 @@ function logAction(msg, type="log-player") {
   li.textContent = msg;
   log.appendChild(li);
   if (log.children.length > 20) log.removeChild(log.firstChild); // Keep log short
-}
-
-function fadeInShip(cellElem) {
-  cellElem.classList.add('fade-in');
-  setTimeout(() => cellElem.classList.remove('fade-in'), 500);
 }
 
   </script>
