@@ -579,6 +579,8 @@ pointer-events: none;
   </style>
 </head>
 <body>
+  <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto" loop></audio>
+  <audio id="hit-sound" src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3" preload="auto"></audio>
 
   <div id="intro-screen">
     <h1>Battleship Ultra</h1>
@@ -723,6 +725,8 @@ const difficulty = window.selectedDiff || 'easy';
   let playerShips = [];
   let gameMode = 'classic';
   let pendingPlayerShots = [];
+  const bgMusic = document.getElementById('bg-music');
+  const hitSound = document.getElementById('hit-sound');
 const confirmSalvoBtn = document.getElementById('confirm-salvo');
 // Fire all selected salvo shots when the confirm button is clicked
 confirmSalvoBtn.onclick = () => {
@@ -775,6 +779,7 @@ confirmSalvoBtn.onclick = () => {
     exp.style.position = 'fixed';
     document.body.appendChild(exp);
     exp.addEventListener('animationend', () => exp.remove());
+    if(hitSound){ hitSound.currentTime = 0; hitSound.play().catch(()=>{}); }
   }
 
   // Show splash effect for misses
@@ -788,6 +793,7 @@ confirmSalvoBtn.onclick = () => {
     splash.style.position = 'fixed';
     document.body.appendChild(splash);
     splash.addEventListener('animationend', () => splash.remove());
+    if(hitSound){ hitSound.currentTime = 0; hitSound.play().catch(()=>{}); }
   }
   // Fade out a sunk ship’s cells
   function fadeOutShip(cellElem) {
@@ -812,10 +818,10 @@ confirmSalvoBtn.onclick = () => {
   const boardDiv = document.getElementById(boardId);
   boardDiv.innerHTML = '';
   boardDiv.className = 'grid board-grid'; // FIX: ensure correct CSS
+  let radar;
   if(!isPlayer){
-    const radar = document.createElement('div');
+    radar = document.createElement('div');
     radar.className = 'radar-sweep';
-    boardDiv.appendChild(radar);
   }
 
   // 2. Build 11x11 grid (first row/col = labels)
@@ -849,6 +855,7 @@ confirmSalvoBtn.onclick = () => {
       boardDiv.appendChild(cell);
     }
   }
+  if(!isPlayer && radar) boardDiv.appendChild(radar);
 }
 
   /* ==============================
@@ -1341,14 +1348,19 @@ setTurnIndicator("Your Turn");
     document.getElementById("endgame-message").textContent = win
       ? "Congratulations, Admiral!" : "The enemy fleet prevailed. Try again!";
     document.getElementById("endgame-modal").classList.add("menu-modal-show");
+    if(bgMusic) bgMusic.pause();
   }
   function hideEndgameModal() {
     document.getElementById("endgame-modal").classList.remove("menu-modal-show");
+    if(bgMusic && document.getElementById('main-menu').style.display === 'flex') {
+      bgMusic.play().catch(()=>{});
+    }
   }
   function showMainMenu() {
     document.getElementById("main-menu").style.display = "flex";
     document.getElementById("game-container").style.display = "none";
     hideEndgameModal();
+    if(bgMusic) { bgMusic.volume = 0.5; bgMusic.play().catch(()=>{}); }
   }
   
   /* ==============================
