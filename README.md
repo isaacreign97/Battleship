@@ -154,6 +154,18 @@
     .splash { animation: splashAnim 0.6s; }
     @keyframes splashAnim { from { opacity: 1;} to { opacity: 0; transform: scale(1.3);}}
     .missile { font-size: 1.7rem; }
+    .attack-pulse {
+      position: absolute;
+      left: 0; top: 0; right: 0; bottom: 0;
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.65);
+      animation: attackPulse 0.6s ease-out forwards;
+    }
+    @keyframes attackPulse {
+      from { transform: scale(0.2); opacity: 0.8; }
+      to { transform: scale(1.2); opacity: 0; }
+    }
     /* === RESPONSIVE (STACK GRIDS ON MOBILE) === */
     @media screen and (max-width: 768px) and (orientation: portrait) {
       .grids-wrapper { flex-direction: column; align-items: center; }
@@ -261,6 +273,7 @@ position: relative;   /* This is important for z-index to work! */
   border: 1px solid #00ffeebb;
   box-sizing: border-box;
   backdrop-filter: blur(6px);
+  transition: background 0.3s, box-shadow 0.3s;
 }
 #hud-panel .hud-stats {
   line-height: 1.1;  
@@ -333,10 +346,16 @@ position: relative;   /* This is important for z-index to work! */
   color: #bbfff6;
   cursor: pointer;
   font-size: 1.1rem;
+  transition: color 0.2s, transform 0.2s;
+}
+#audio-controls button:hover {
+  color: #ffffff;
+  transform: scale(1.1);
 }
 #audio-controls input[type=range] {
   width: 60px;
   margin-left: 4px;
+  transition: opacity 0.3s;
 }
 
 /* --- Pull Down Action Log Styles --- */
@@ -489,6 +508,29 @@ z-index: 10;
     z-index: -1;
 pointer-events: none;
     background: linear-gradient(160deg, #233d6d 40%, #110b26 100%);
+    animation: starBreath 18s ease-in-out infinite;
+  }
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    left: -25%;
+    top: -25%;
+    width: 150%;
+    height: 150%;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(100,180,255,0.07), transparent 70%);
+    animation: bgPulse 12s ease-in-out infinite;
+    z-index: -2;
+  }
+  body::after { animation-delay: 6s; }
+  @keyframes bgPulse {
+    0%,100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.1); opacity: 0.45; }
+  }
+  @keyframes starBreath {
+    0%,100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.03); opacity: 1; }
   }
   #intro-screen {
     position: fixed;
@@ -918,6 +960,7 @@ document.addEventListener('visibilitychange', () => {
     exp.style.position = 'fixed';
     document.body.appendChild(exp);
     exp.addEventListener('animationend', () => exp.remove());
+    showPulse(targetElem);
     if(hitSound){ hitSound.currentTime = 0; hitSound.play().catch(()=>{}); }
   }
 
@@ -932,7 +975,14 @@ document.addEventListener('visibilitychange', () => {
     splash.style.position = 'fixed';
     document.body.appendChild(splash);
     splash.addEventListener('animationend', () => splash.remove());
+    showPulse(targetElem);
     if(hitSound){ hitSound.currentTime = 0; hitSound.play().catch(()=>{}); }
+  }
+  function showPulse(targetElem) {
+    const ring = document.createElement('div');
+    ring.className = 'attack-pulse';
+    targetElem.appendChild(ring);
+    ring.addEventListener('animationend', () => ring.remove());
   }
   // Fade out a sunk ship’s cells
   function fadeOutShip(cellElem) {
