@@ -5,7 +5,7 @@
       HEAD: Meta & Page Settings
       ========================= -->
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <meta name="description" content="Play Battleship Ultra - now with animations" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -729,11 +729,16 @@ pointer-events: none;
     opacity: 0.93;
     user-select: none;
   }
-  @media (max-width: 650px) {
-    .halo-menu-box { min-width: 0; width: 98vw; padding: 7vw 3vw; }
-    .halo-title { font-size: 2.1rem; }
-    .halo-menu-options { width: 96vw; }
-  }
+@media (max-width: 650px) {
+  .halo-menu-box { min-width: 0; width: 98vw; padding: 7vw 3vw; }
+  .halo-title { font-size: 2.1rem; }
+  .halo-menu-options { width: 96vw; }
+}
+@media (max-width: 480px) {
+  .grid { width: 94vw; height: 94vw; }
+  .halo-menu-box { width: 95vw; padding: 8vw 4vw; }
+  body { font-size: 14px; }
+}
 
 
   </style>
