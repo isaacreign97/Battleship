@@ -897,11 +897,6 @@ confirmSalvoBtn.onclick = () => {
       placementOrientation.charAt(0).toUpperCase() + placementOrientation.slice(1);
     showPlacementHint();
   };
-  document.addEventListener('keydown', e => {
-    if(e.key.toLowerCase() === 'r' && document.getElementById('main-controls').style.display !== 'none') {
-      document.getElementById('toggle-orientation').click();
-    }
-  });
   showPlacementHint();
 }
 
@@ -1460,6 +1455,12 @@ function restartGame() {
   document.addEventListener('keydown', e => {
     if(e.key === 'Enter' && confirmSalvoBtn.style.display !== 'none') {
       confirmSalvoBtn.click();
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if(e.key.toLowerCase() === 'r' && document.getElementById('main-controls').style.display !== 'none') {
+      e.preventDefault();
+      document.getElementById('toggle-orientation').click();
     }
   });
   // Starfield
