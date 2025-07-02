@@ -676,8 +676,33 @@ pointer-events: none;
     width: 310px; display: flex; flex-direction: row; gap: 18px; margin-bottom: 0;
     flex-wrap: wrap; justify-content: center;
   }
-  .halo-menu-options + .halo-menu-options { margin-top: 6px; }
-  .halo-btn {
+.halo-menu-options + .halo-menu-options { margin-top: 6px; }
+.halo-select {
+  min-width: 180px;
+  font-size: 1.05rem;
+  color: #e9fcff;
+  background: rgba(70,113,188,0.10);
+  border: 2px solid #3ec3ff33;
+  padding: 11px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 2.5px 10px #18e5f911;
+  transition: box-shadow 0.18s, background 0.16s, border 0.19s, color 0.18s, transform 0.12s;
+}
+.halo-select:hover, .halo-select:focus {
+  color: #57c1ff;
+  background: rgba(56,127,255,0.17);
+  border-color: #51f6ff;
+  box-shadow: 0 5px 34px #2ad8ff44, 0 2px 18px #27c7f1bb;
+  transform: scale(1.048) translateY(-2px);
+  animation: bounceUpDown 0.6s infinite;
+  outline: none;
+}
+.halo-select:active {
+  transform: scale(0.98);
+  animation: clickDownUp 0.3s;
+}
+.halo-btn {
     min-width: 92px;
     font-size: 1.09rem;
     color: #e9fcff;
@@ -779,22 +804,28 @@ pointer-events: none;
     </div>
     <div class="halo-subtitle">Select Game Mode</div>
     <div class="halo-menu-options">
-      <button class="halo-btn" data-mode="classic" autofocus aria-label="Classic mode">Classic</button>
-      <button class="halo-btn" data-mode="salvo" aria-label="Salvo mode">Salvo</button>
+      <select id="mode-select" class="halo-select" aria-label="Game mode">
+        <option value="classic" selected>Classic</option>
+        <option value="salvo">Salvo</option>
+      </select>
     </div>
     <div class="halo-subtitle" style="margin-top:18px;">AI Difficulty</div>
     <div class="halo-menu-options">
-      <button class="halo-btn" data-diff="easy" aria-label="Easy difficulty">Easy</button>
-      <button class="halo-btn" data-diff="medium" aria-label="Medium difficulty">Medium</button>
-      <button class="halo-btn" data-diff="hard" aria-label="Hard difficulty">Hard</button>
-      <button class="halo-btn" data-diff="advanced" aria-label="Advanced difficulty">Advanced</button>
-      <button class="halo-btn" data-diff="god" aria-label="God difficulty">God</button>
+      <select id="diff-select" class="halo-select" aria-label="AI difficulty">
+        <option value="easy" selected>Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+        <option value="advanced">Advanced</option>
+        <option value="god">God</option>
+      </select>
     </div>
     <div class="halo-subtitle" style="margin-top:18px;">Theme</div>
     <div class="halo-menu-options">
-      <button class="halo-btn" data-theme="navy" aria-label="Navy theme">Navy</button>
-      <button class="halo-btn" data-theme="scifi" aria-label="Sci-Fi theme">Sci-Fi</button>
-      <button class="halo-btn" data-theme="pirate" aria-label="Pirate theme">Pirate</button>
+      <select id="theme-select" class="halo-select" aria-label="Theme">
+        <option value="navy" selected>Navy</option>
+        <option value="scifi">Sci-Fi</option>
+        <option value="pirate">Pirate</option>
+      </select>
     </div>
     <div style="margin:30px 0 8px 0;">
       <button class="halo-btn halo-btn-big" id="menu-start" aria-label="Start game">Start Game</button>
@@ -1790,56 +1821,29 @@ function restartGame() {
   let selectedDiff = 'easy';
   let selectedTheme = 'navy';
   applyTheme(selectedTheme);
-  // Mode buttons
-  document.querySelectorAll('.halo-btn[data-mode]').forEach((btn, idx, arr) => {
-    btn.onclick = () => {
-      arr.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedMode = btn.getAttribute('data-mode');
-    };
-    // Default: classic active
-    if(idx===0) btn.classList.add('active');
-  });
-  // Diff buttons
-  document.querySelectorAll('.halo-btn[data-diff]').forEach((btn, idx, arr) => {
-    btn.onclick = () => {
-      arr.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedDiff = btn.getAttribute('data-diff');
-    };
-    // Default: easy active
-    if(idx===0) btn.classList.add('active');
-  });
-  // Theme buttons
-    document.querySelectorAll('.halo-btn[data-theme]').forEach((btn, idx, arr) => {
-      btn.onclick = () => {
-        arr.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedTheme = btn.getAttribute('data-theme');
-        localStorage.setItem('bs-theme', selectedTheme);
-        applyTheme(selectedTheme);
-      };
-      if(idx===0) btn.classList.add('active');
-    });
+  // Dropdowns for menu selections
+  const modeSelect = document.getElementById('mode-select');
+  selectedMode = modeSelect.value;
+  modeSelect.onchange = () => { selectedMode = modeSelect.value; };
+
+  const diffSelect = document.getElementById('diff-select');
+  selectedDiff = diffSelect.value;
+  diffSelect.onchange = () => { selectedDiff = diffSelect.value; };
+
+  const themeSelect = document.getElementById('theme-select');
+  selectedTheme = themeSelect.value;
+  themeSelect.onchange = () => {
+    selectedTheme = themeSelect.value;
+    localStorage.setItem('bs-theme', selectedTheme);
+    applyTheme(selectedTheme);
+  };
 
   function applyTheme(theme) {
     document.body.classList.remove('theme-navy','theme-scifi','theme-pirate');
     document.body.classList.add('theme-' + theme);
   }
 
-  // Keyboard nav
-  const allBtns = Array.from(document.querySelectorAll('.halo-btn'));
-  let btnIndex = 0;
-  function updateBtnFocus(idx) {
-    allBtns.forEach((b,i)=>b.classList.toggle('active',i===idx));
-    allBtns[idx].focus();
-  }
-  document.addEventListener('keydown', e => {
-    if(document.getElementById('main-menu').style.display === 'none') return;
-    if(e.key==="ArrowDown"||e.key==="s") { btnIndex=(btnIndex+1)%allBtns.length; updateBtnFocus(btnIndex);}
-    if(e.key==="ArrowUp"||e.key==="w") { btnIndex=(btnIndex-1+allBtns.length)%allBtns.length; updateBtnFocus(btnIndex);}
-    if(e.key==="Enter"||e.key===" ") { allBtns[btnIndex].click(); }
-  });
+
 
   // Start Game button
   document.getElementById('menu-start').onclick = function() {
