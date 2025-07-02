@@ -291,10 +291,18 @@ position: relative;   /* This is important for z-index to work! */
 
 /* --- Audio Control Styles --- */
 #audio-controls {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 4px;
+  padding: 6px 8px;
+  background: rgba(20,38,55,0.92);
+  border: 1px solid #00ffeebb;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px #21fff633;
+  z-index: 1100;
 }
 #audio-controls button {
   background: none;
@@ -701,15 +709,6 @@ pointer-events: none;
     </div>
     <div id="powerups" aria-label="Power ups"></div>
     <div id="hud-last-move"></div>
-    <div id="audio-controls" aria-label="Audio controls">
-      <button id="toggle-mute" aria-label="Mute or unmute sound">🔊</button>
-      <label style="font-size:0.85rem;">Music
-        <input id="music-volume" type="range" min="0" max="1" step="0.05" value="0.5"/>
-      </label>
-      <label style="font-size:0.85rem;">SFX
-        <input id="sfx-volume" type="range" min="0" max="1" step="0.05" value="1"/>
-      </label>
-    </div>
   </div>
   <div id="action-log-panel" class="collapsed">
     <div id="action-log-tab" onclick="toggleLogPanel()">
@@ -739,6 +738,16 @@ pointer-events: none;
   <button id="restart-game" aria-label="Restart game">Restart</button>
   <button id="go-main-menu" aria-label="Return to main menu">Main Menu</button>
   <button id="confirm-salvo" aria-label="Confirm salvo shots" style="display: none;">Confirm Shots</button>
+</div>
+<!-- Floating audio controls -->
+<div id="audio-controls" aria-label="Audio controls">
+  <button id="toggle-mute" aria-label="Mute or unmute sound">🔊</button>
+  <label style="font-size:0.85rem;">Music
+    <input id="music-volume" type="range" min="0" max="1" step="0.05" value="0.5"/>
+  </label>
+  <label style="font-size:0.85rem;">SFX
+    <input id="sfx-volume" type="range" min="0" max="1" step="0.05" value="1"/>
+  </label>
 </div>
     </div>
 
@@ -801,12 +810,14 @@ muteBtn.onclick = () => {
   updateMuteIcon();
 };
 if(musicSlider){
-  bgMusic.volume = parseFloat(musicSlider.value);
-  musicSlider.oninput = () => { if(bgMusic) bgMusic.volume = parseFloat(musicSlider.value); };
+  const applyMusicVolume = () => { if(bgMusic) bgMusic.volume = parseFloat(musicSlider.value); };
+  applyMusicVolume();
+  musicSlider.addEventListener('input', applyMusicVolume);
 }
 if(sfxSlider){
-  hitSound.volume = parseFloat(sfxSlider.value);
-  sfxSlider.oninput = () => { if(hitSound) hitSound.volume = parseFloat(sfxSlider.value); };
+  const applySfxVolume = () => { if(hitSound) hitSound.volume = parseFloat(sfxSlider.value); };
+  applySfxVolume();
+  sfxSlider.addEventListener('input', applySfxVolume);
 }
 updateMuteIcon();
 
