@@ -289,6 +289,25 @@ position: relative;   /* This is important for z-index to work! */
 }
 @keyframes pulse {0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);}}
 
+/* --- Audio Control Styles --- */
+#audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+#audio-controls button {
+  background: none;
+  border: none;
+  color: #bbfff6;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+#audio-controls input[type=range] {
+  width: 60px;
+  margin-left: 4px;
+}
+
 /* --- Pull Down Action Log Styles --- */
 #action-log-panel {
   min-width: 210px;
@@ -682,6 +701,15 @@ pointer-events: none;
     </div>
     <div id="powerups" aria-label="Power ups"></div>
     <div id="hud-last-move"></div>
+    <div id="audio-controls" aria-label="Audio controls">
+      <button id="toggle-mute" aria-label="Mute or unmute sound">🔊</button>
+      <label style="font-size:0.85rem;">Music
+        <input id="music-volume" type="range" min="0" max="1" step="0.05" value="0.5"/>
+      </label>
+      <label style="font-size:0.85rem;">SFX
+        <input id="sfx-volume" type="range" min="0" max="1" step="0.05" value="1"/>
+      </label>
+    </div>
   </div>
   <div id="action-log-panel" class="collapsed">
     <div id="action-log-tab" onclick="toggleLogPanel()">
@@ -749,14 +777,38 @@ applyTheme(theme);
   let gameMode = 'classic';
   let pendingPlayerShots = [];
   let hoveredCell = null; // Track which board cell is under the mouse
-  const bgMusic = document.getElementById('bg-music');
-  const hitSound = document.getElementById('hit-sound');
+const bgMusic = document.getElementById('bg-music');
+const hitSound = document.getElementById('hit-sound');
+const muteBtn = document.getElementById('toggle-mute');
+const musicSlider = document.getElementById('music-volume');
+const sfxSlider = document.getElementById('sfx-volume');
+let audioMuted = false;
 const confirmSalvoBtn = document.getElementById('confirm-salvo');
 // Fire all selected salvo shots when the confirm button is clicked
 confirmSalvoBtn.onclick = () => {
   confirmSalvoBtn.style.display = 'none';
   applyPlayerSalvoShots();
 };
+
+// --- Audio Control Handlers ---
+function updateMuteIcon() {
+  muteBtn.textContent = audioMuted ? '🔈' : '🔊';
+}
+muteBtn.onclick = () => {
+  audioMuted = !audioMuted;
+  if(bgMusic) bgMusic.muted = audioMuted;
+  if(hitSound) hitSound.muted = audioMuted;
+  updateMuteIcon();
+};
+if(musicSlider){
+  bgMusic.volume = parseFloat(musicSlider.value);
+  musicSlider.oninput = () => { if(bgMusic) bgMusic.volume = parseFloat(musicSlider.value); };
+}
+if(sfxSlider){
+  hitSound.volume = parseFloat(sfxSlider.value);
+  sfxSlider.oninput = () => { if(hitSound) hitSound.volume = parseFloat(sfxSlider.value); };
+}
+updateMuteIcon();
 
   /* ==============================
      ANIMATION FUNCTIONS
@@ -1396,14 +1448,18 @@ setTurnIndicator("Your Turn");
     const modal = document.getElementById("endgame-modal");
     modal.classList.remove("menu-modal-show", "victory", "defeat");
     if(bgMusic && document.getElementById('main-menu').style.display === 'flex') {
-      bgMusic.play().catch(()=>{});
+      bgMusic.volume = parseFloat(musicSlider.value);
+      if(!audioMuted) bgMusic.play().catch(()=>{});
     }
   }
   function showMainMenu() {
     document.getElementById("main-menu").style.display = "flex";
     document.getElementById("game-container").style.display = "none";
     hideEndgameModal();
-    if(bgMusic) { bgMusic.volume = 0.5; bgMusic.play().catch(()=>{}); }
+    if(bgMusic) {
+      bgMusic.volume = parseFloat(musicSlider.value);
+      if(!audioMuted) bgMusic.play().catch(()=>{});
+    }
   }
   
   /* ==============================
