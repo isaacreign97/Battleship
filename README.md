@@ -723,7 +723,12 @@ const difficulty = window.selectedDiff || 'easy';
   let playerShips = [];
   let gameMode = 'classic';
   let pendingPlayerShots = [];
-  const confirmSalvoBtn = document.getElementById('confirm-salvo');
+const confirmSalvoBtn = document.getElementById('confirm-salvo');
+// Fire all selected salvo shots when the confirm button is clicked
+confirmSalvoBtn.onclick = () => {
+  confirmSalvoBtn.style.display = 'none';
+  applyPlayerSalvoShots();
+};
 
   /* ==============================
      ANIMATION FUNCTIONS
@@ -1415,9 +1420,6 @@ function restartGame() {
     showMainMenu();
     restartGame();
   };
-    confirmSalvoBtn.style.display = 'none';
-    applyPlayerSalvoShots();
-  };
   document.addEventListener('keydown', e => {
     if(e.key === 'Enter' && confirmSalvoBtn.style.display !== 'none') {
       confirmSalvoBtn.click();
@@ -1560,11 +1562,6 @@ function logAction(msg, type="log-player") {
   li.textContent = msg;
   log.appendChild(li);
   if (log.children.length > 20) log.removeChild(log.firstChild); // Keep log short
-}
-
-function fadeInShip(cellElem) {
-  cellElem.classList.add('fade-in');
-  setTimeout(() => cellElem.classList.remove('fade-in'), 500);
 }
 
   </script>
