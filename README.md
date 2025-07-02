@@ -103,9 +103,14 @@
     .cell.label-cell { background: #112233; font-weight: bold; color: #3fffd7; }
     .cell.corner-cell { background: #19283e; }
     /* === SHIP PLACEMENT & STATUS === */
-    .ship-preview { background-color: #2efb89cc !important; }
+    .ship-preview { background-color: #50ffb6cc !important; }
     .bad-placement { background-color: #ff6961cc !important; }
-    .ship { background-color: #49a0ff; }
+    .ship {
+      background: linear-gradient(135deg, rgba(90,220,255,0.85), rgba(40,140,255,0.85));
+      border: 1px solid #80eaff;
+      box-shadow: inset 0 0 8px #80eaff55, 0 0 6px #2dfdff88;
+      backdrop-filter: brightness(1.25);
+    }
     .fade-in { animation: fadein 0.4s; }
     @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
     .fading-out { animation: fadeout 1.2s forwards; }
