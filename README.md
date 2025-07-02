@@ -780,8 +780,9 @@ pointer-events: none;
   // Why: Define all fixed values, ships, and global state needed throughout game
 const mode = window.selectedMode || 'classic';
 const difficulty = window.selectedDiff || 'easy';
-const theme = window.selectedTheme || 'navy';
+const theme = localStorage.getItem('bs-theme') || window.selectedTheme || 'navy';
 applyTheme(theme);
+window.selectedTheme = theme;
   const BOARD_SIZE = 10;
   const SHIPS = [
     { name: "Carrier", size: 5 },
@@ -810,7 +811,15 @@ const hitSound = document.getElementById('hit-sound');
 const muteBtn = document.getElementById('toggle-mute');
 const musicSlider = document.getElementById('music-volume');
 const sfxSlider = document.getElementById('sfx-volume');
-let audioMuted = false;
+let audioMuted = localStorage.getItem('bs-muted') === 'true';
+if(musicSlider){
+  const mv = localStorage.getItem('bs-music-vol');
+  if(mv !== null) musicSlider.value = mv;
+}
+if(sfxSlider){
+  const sv = localStorage.getItem('bs-sfx-vol');
+  if(sv !== null) sfxSlider.value = sv;
+}
 const confirmSalvoBtn = document.getElementById('confirm-salvo');
 // Fire all selected salvo shots when the confirm button is clicked
 confirmSalvoBtn.onclick = () => {
@@ -826,19 +835,30 @@ muteBtn.onclick = () => {
   audioMuted = !audioMuted;
   if(bgMusic) bgMusic.muted = audioMuted;
   if(hitSound) hitSound.muted = audioMuted;
+  localStorage.setItem('bs-muted', audioMuted);
   updateMuteIcon();
-};
+}; 
 if(musicSlider){
   const applyMusicVolume = () => { if(bgMusic) bgMusic.volume = parseFloat(musicSlider.value); };
-  applyMusicVolume();
-  musicSlider.addEventListener('input', applyMusicVolume);
+  const setMusicVol = () => { applyMusicVolume(); localStorage.setItem('bs-music-vol', musicSlider.value); };
+  setMusicVol();
+  musicSlider.addEventListener('input', setMusicVol);
 }
 if(sfxSlider){
   const applySfxVolume = () => { if(hitSound) hitSound.volume = parseFloat(sfxSlider.value); };
-  applySfxVolume();
-  sfxSlider.addEventListener('input', applySfxVolume);
+  const setSfxVol = () => { applySfxVolume(); localStorage.setItem('bs-sfx-vol', sfxSlider.value); };
+  setSfxVol();
+  sfxSlider.addEventListener('input', setSfxVol);
 }
 updateMuteIcon();
+
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden) {
+    if(bgMusic) bgMusic.pause();
+  } else {
+    if(bgMusic && !audioMuted) bgMusic.play().catch(()=>{});
+  }
+});
 
   /* ==============================
      ANIMATION FUNCTIONS
@@ -1641,15 +1661,16 @@ function restartGame() {
     if(idx===0) btn.classList.add('active');
   });
   // Theme buttons
-  document.querySelectorAll('.halo-btn[data-theme]').forEach((btn, idx, arr) => {
-    btn.onclick = () => {
-      arr.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedTheme = btn.getAttribute('data-theme');
-      applyTheme(selectedTheme);
-    };
-    if(idx===0) btn.classList.add('active');
-  });
+    document.querySelectorAll('.halo-btn[data-theme]').forEach((btn, idx, arr) => {
+      btn.onclick = () => {
+        arr.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedTheme = btn.getAttribute('data-theme');
+        localStorage.setItem('bs-theme', selectedTheme);
+        applyTheme(selectedTheme);
+      };
+      if(idx===0) btn.classList.add('active');
+    });
 
   function applyTheme(theme) {
     document.body.classList.remove('theme-navy','theme-scifi','theme-pirate');
