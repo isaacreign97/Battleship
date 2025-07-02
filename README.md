@@ -765,6 +765,14 @@ pointer-events: none;
   body { font-size: 14px; }
 }
 
+/* --- Draggable elements --- */
+.draggable {
+  position: fixed;
+  cursor: move;
+  touch-action: none;
+  z-index: 1200;
+}
+
 
   </style>
 </head>
@@ -1756,6 +1764,7 @@ function restartGame() {
     document.getElementById('intro-screen').style.display = 'flex';
     document.getElementById('main-menu').style.display = 'none';
     document.getElementById('game-container').style.display = 'none';
+    setupDraggables();
   };
   document.getElementById('intro-start').onclick = function(){
     document.getElementById('intro-screen').classList.add('hide');
@@ -1815,6 +1824,54 @@ function restartGame() {
     requestAnimationFrame(drawStarfield);
   }
   drawStarfield();
+
+  // --- Drag and Drop Helpers ---
+  function makeDraggable(el){
+    let offX=0, offY=0;
+    function start(e){
+      e.preventDefault();
+      const rect=el.getBoundingClientRect();
+      const c=e.touches?e.touches[0]:e;
+      offX=c.clientX-rect.left;
+      offY=c.clientY-rect.top;
+      document.addEventListener('mousemove',move);
+      document.addEventListener('touchmove',move);
+      document.addEventListener('mouseup',end);
+      document.addEventListener('touchend',end);
+    }
+    function move(e){
+      const c=e.touches?e.touches[0]:e;
+      el.style.left=(c.clientX-offX)+'px';
+      el.style.top=(c.clientY-offY)+'px';
+    }
+    function end(){
+      document.removeEventListener('mousemove',move);
+      document.removeEventListener('touchmove',move);
+      document.removeEventListener('mouseup',end);
+      document.removeEventListener('touchend',end);
+    }
+    el.addEventListener('mousedown',start);
+    el.addEventListener('touchstart',start);
+  }
+
+  function setupDraggables(){
+    const selectors=['#hud-panel','#action-log-panel','.control-panel','#audio-controls','#powerups'];
+    selectors.forEach(sel=>{
+      const el=document.querySelector(sel);
+      if(el){
+        const rect=el.getBoundingClientRect();
+        const ph=document.createElement('div');
+        ph.style.width=rect.width+'px';
+        ph.style.height=rect.height+'px';
+        el.parentNode.insertBefore(ph,el);
+        document.body.appendChild(el);
+        el.classList.add('draggable');
+        el.style.left=rect.left+'px';
+        el.style.top=rect.top+'px';
+        makeDraggable(el);
+      }
+    });
+  }
 
   // --- HALO MENU LOGIC ---
   let selectedMode = 'classic';
@@ -1950,6 +2007,7 @@ function updateHUD() {
         span.title = p==='cluster'?'Cluster Bomb':'Sonar Pulse';
         span.onclick=()=>activatePowerup(idx);
         pwrap.appendChild(span);
+        makeDraggable(span);
       });
     }
 }
