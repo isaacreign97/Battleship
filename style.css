@@ -1,0 +1,43 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(10, 30px);
+    grid-template-rows: repeat(10, 30px);
+    gap: 2px;
+    margin: 20px auto;
+    width: fit-content;
+}
+
+.cell {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.cell.hit {
+    background-color: #4caf50;
+}
+
+.cell.miss {
+    background-color: #f44336;
+}
+
+#log {
+    list-style: none;
+    padding: 0;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+}
+
+#log li {
+    text-align: left;
+    padding: 4px;
+    border-bottom: 1px solid #eee;
+}
