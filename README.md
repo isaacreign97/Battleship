@@ -26,6 +26,15 @@
       color: #fff;
       padding: 20px;
     }
+    /* === THEME CLASSES === */
+    body.theme-navy { background-color: #001b36; }
+    body.theme-scifi { background-color: #0f1b2b; }
+    body.theme-pirate { background-color: #2b1a0f; }
+    body.theme-navy #starfield { background: radial-gradient(circle at center, #133b64, #010c1a); }
+    body.theme-scifi #starfield { background: linear-gradient(160deg, #233d6d 40%, #110b26 100%); }
+    body.theme-pirate #starfield { background: radial-gradient(circle at center, #3d2f1a, #150d07); }
+    body.theme-navy h1, body.theme-navy .grid-label { color: #1cdad7; }
+    body.theme-pirate h1, body.theme-pirate .grid-label { color: #ffbf00; }
     h1 {
     font-family: "Orbitron", "Segoe UI", Arial, sans-serif;
       margin-bottom: 10px;
@@ -629,6 +638,12 @@ pointer-events: none;
       <button class="halo-btn" data-diff="advanced" aria-label="Advanced difficulty">Advanced</button>
       <button class="halo-btn" data-diff="god" aria-label="God difficulty">God</button>
     </div>
+    <div class="halo-subtitle" style="margin-top:18px;">Theme</div>
+    <div class="halo-menu-options">
+      <button class="halo-btn" data-theme="navy" aria-label="Navy theme">Navy</button>
+      <button class="halo-btn" data-theme="scifi" aria-label="Sci-Fi theme">Sci-Fi</button>
+      <button class="halo-btn" data-theme="pirate" aria-label="Pirate theme">Pirate</button>
+    </div>
     <div style="margin:30px 0 8px 0;">
       <button class="halo-btn halo-btn-big" id="menu-start" aria-label="Start game">Start Game</button>
     </div>
@@ -709,6 +724,8 @@ pointer-events: none;
   // Why: Define all fixed values, ships, and global state needed throughout game
 const mode = window.selectedMode || 'classic';
 const difficulty = window.selectedDiff || 'easy';
+const theme = window.selectedTheme || 'navy';
+applyTheme(theme);
   const BOARD_SIZE = 10;
   const SHIPS = [
     { name: "Carrier", size: 5 },
@@ -1515,6 +1532,8 @@ function restartGame() {
   // --- HALO MENU LOGIC ---
   let selectedMode = 'classic';
   let selectedDiff = 'easy';
+  let selectedTheme = 'navy';
+  applyTheme(selectedTheme);
   // Mode buttons
   document.querySelectorAll('.halo-btn[data-mode]').forEach((btn, idx, arr) => {
     btn.onclick = () => {
@@ -1535,6 +1554,21 @@ function restartGame() {
     // Default: easy active
     if(idx===0) btn.classList.add('active');
   });
+  // Theme buttons
+  document.querySelectorAll('.halo-btn[data-theme]').forEach((btn, idx, arr) => {
+    btn.onclick = () => {
+      arr.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedTheme = btn.getAttribute('data-theme');
+      applyTheme(selectedTheme);
+    };
+    if(idx===0) btn.classList.add('active');
+  });
+
+  function applyTheme(theme) {
+    document.body.classList.remove('theme-navy','theme-scifi','theme-pirate');
+    document.body.classList.add('theme-' + theme);
+  }
 
   // Keyboard nav
   const allBtns = Array.from(document.querySelectorAll('.halo-btn'));
@@ -1555,6 +1589,7 @@ function restartGame() {
     // Set game mode & difficulty in your logic:
     window.selectedMode = selectedMode;
     window.selectedDiff = selectedDiff;
+    window.selectedTheme = selectedTheme;
     // Hide menu, show game (insert your code here)
     document.getElementById('main-menu').style.display = "none";
     // Example: Show the main game container
@@ -1565,6 +1600,7 @@ function restartGame() {
       // Assign selected mode/difficulty to your game's variables!
       gameMode = selectedMode;
       aiDifficulty = selectedDiff;
+      applyTheme(selectedTheme);
       restartGame();
     }
   };
