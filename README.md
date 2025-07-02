@@ -6,7 +6,7 @@
       ========================= -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="Play Battleship Ultra - now with music and animations" />
+  <meta name="description" content="Play Battleship Ultra with animations" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;family=Orbitron:wght@400;700&amp;display=swap" rel="stylesheet">
@@ -584,10 +584,6 @@ pointer-events: none;
     <button id="intro-start">Enter</button>
   </div>
 
-  <audio id="bg-music" src="https://cdn.pixabay.com/download/audio/2022/12/19/audio_09d6395b90.mp3?filename=future-ambient-12641.mp3" loop></audio>
-  <audio id="sfx-hit" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3cebe34f09.mp3?filename=boom-18732.mp3"></audio>
-  <audio id="sfx-miss" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_d67e7ef494.mp3?filename=whoosh-6311.mp3"></audio>
-
   <!-- =========================
       ENDGAME MODAL OVERLAY
       ========================= -->
@@ -773,8 +769,7 @@ const difficulty = window.selectedDiff || 'easy';
     exp.style.position = 'fixed';
     document.body.appendChild(exp);
     exp.addEventListener('animationend', () => exp.remove());
-    document.getElementById('sfx-hit').currentTime = 0;
-    document.getElementById('sfx-hit').play().catch(()=>{});
+    
   }
 
   // Show splash effect for misses
@@ -788,8 +783,7 @@ const difficulty = window.selectedDiff || 'easy';
     splash.style.position = 'fixed';
     document.body.appendChild(splash);
     splash.addEventListener('animationend', () => splash.remove());
-    document.getElementById('sfx-miss').currentTime = 0;
-    document.getElementById('sfx-miss').play().catch(()=>{});
+
   }
 
   // Fade out a sunk ship’s cells
@@ -1344,9 +1338,7 @@ setTurnIndicator("Your Turn");
     document.getElementById("endgame-message").textContent = win
       ? "Congratulations, Admiral!" : "The enemy fleet prevailed. Try again!";
     document.getElementById("endgame-modal").classList.add("menu-modal-show");
-    document.getElementById('bg-music').pause();
-    const sfx = win ? document.getElementById('sfx-hit') : document.getElementById('sfx-miss');
-    sfx.currentTime = 0; sfx.play().catch(()=>{});
+
   }
   function hideEndgameModal() {
     document.getElementById("endgame-modal").classList.remove("menu-modal-show");
@@ -1397,8 +1389,7 @@ function restartGame() {
   document.querySelectorAll('.salvo-selected').forEach(cell => cell.classList.remove('salvo-selected'));
   logAction("Game restarted. Place your ships!", "log-player");
   updateHUD();
-  const music = document.getElementById('bg-music');
-  if (music.paused) { music.volume = 0.4; music.play().catch(()=>{}); }
+
 }
   function setTurnIndicator(msg) {
     document.getElementById('turn-indicator').textContent = msg || '';
@@ -1427,7 +1418,6 @@ function restartGame() {
     document.getElementById('intro-screen').classList.add('hide');
     showMainMenu();
     restartGame();
-    document.getElementById('bg-music').play().catch(()=>{});
   };
   confirmSalvoBtn.onclick = function() {
     confirmSalvoBtn.style.display = 'none';
