@@ -448,6 +448,7 @@ pointer-events: none;
     cursor:pointer;
   }
   #enemy-board .radar-sweep {
+    z-index: 5;
     pointer-events: none;
     position: absolute;
     left:0; top:0;
@@ -633,7 +634,7 @@ pointer-events: none;
   <div id="game-container" style="display: flex;">
 <h1>Battleship Ultra</h1>
   <h3 id="turn-indicator"></h3>
-  <div id="messages" aria-live="polite"></div>
+  <div id="messages" role="status" aria-live="polite"></div>
     <!-- === SHIP PLACEMENT CONTROLS === -->
     <div id="main-controls" style="display: none; flex-direction: column; align-items: center; width: 100%;">
       <div id="placement-controls">
@@ -686,7 +687,7 @@ pointer-events: none;
 <div class="control-panel">
   <button id="restart-game">Restart</button>
   <button id="go-main-menu">Main Menu</button>
-  <button id="confirm-salvo" style="display: none;">Confirm Shots</button>
+  <button id="confirm-salvo" aria-label="Confirm salvo shots" style="display: none;">Confirm Shots</button>
 </div>
     </div>
 
