@@ -6,6 +6,7 @@
       ========================= -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Play Battleship Ultra - now with music and animations" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;family=Orbitron:wght@400;700&amp;display=swap" rel="stylesheet">
@@ -265,6 +266,15 @@ position: relative;   /* This is important for z-index to work! */
   margin-top: 1px;
   font-style: italic;
 }
+#powerups {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+#powerups .power-icon {
+  animation: pulse 1.2s infinite;
+}
+@keyframes pulse {0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);}}
 
 /* --- Pull Down Action Log Styles --- */
 #action-log-panel {
@@ -361,7 +371,8 @@ z-index: 10;
 
 .board-grid {
   margin: 0 8px;
-z-index: 10;
+  z-index: 10;
+  position: relative;
 }
 
 .control-panel {
@@ -402,12 +413,51 @@ z-index: 10;
   .grid { width: 97vw; height: 97vw; max-width: 340px; max-height: 340px; }
 }
 
- #starfield {
+  #starfield {
     position: fixed; left:0; top:0; width:100vw; height:100vh;
     z-index: -1;
 pointer-events: none;
     background: linear-gradient(160deg, #233d6d 40%, #110b26 100%);
   }
+  #intro-screen {
+    position: fixed;
+    left: 0; top: 0;
+    width: 100vw; height: 100vh;
+    display: flex;
+    align-items: center; justify-content: center;
+    background: radial-gradient(circle at center, rgba(25,40,62,0.95), #0f1b2b);
+    z-index: 2002;
+    flex-direction: column;
+    color: #aee7ff;
+    font-family: 'Orbitron', 'Segoe UI', Arial, sans-serif;
+    animation: fadeInBG 1.2s cubic-bezier(.13,.84,.37,1);
+  }
+  #intro-screen.hide {
+    animation: fadeOutIntro 1s forwards;
+  }
+  @keyframes fadeOutIntro { to { opacity:0; visibility: hidden; } }
+  #intro-screen button {
+    margin-top: 28px;
+    padding: 14px 36px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg,#1de9ff,#00bcd4);
+    color:#042630;
+    font-size:1.2rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  #enemy-board .radar-sweep {
+    pointer-events: none;
+    position: absolute;
+    left:0; top:0;
+    width:100%; height:100%;
+    border-radius: 12px;
+    background: conic-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0) 80%);
+    animation: radar 2s linear infinite;
+    mix-blend-mode: overlay;
+  }
+  @keyframes radar { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
   .halo-menu {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; z-index: 1001;
@@ -529,6 +579,15 @@ pointer-events: none;
 </head>
 <body>
 
+  <div id="intro-screen">
+    <h1>Battleship Ultra</h1>
+    <button id="intro-start">Enter</button>
+  </div>
+
+  <audio id="bg-music" src="https://cdn.pixabay.com/download/audio/2022/12/19/audio_09d6395b90.mp3?filename=future-ambient-12641.mp3" loop></audio>
+  <audio id="sfx-hit" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3cebe34f09.mp3?filename=boom-18732.mp3"></audio>
+  <audio id="sfx-miss" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_d67e7ef494.mp3?filename=whoosh-6311.mp3"></audio>
+
   <!-- =========================
       ENDGAME MODAL OVERLAY
       ========================= -->
@@ -578,14 +637,14 @@ pointer-events: none;
   <div id="game-container" style="display: flex;">
 <h1>Battleship Ultra</h1>
   <h3 id="turn-indicator"></h3>
-  <div id="messages"></div>
+  <div id="messages" aria-live="polite"></div>
     <!-- === SHIP PLACEMENT CONTROLS === -->
     <div id="main-controls" style="display: none; flex-direction: column; align-items: center; width: 100%;">
       <div id="placement-controls">
         <label>Ship:
           <select id="ship-select"></select>
         </label>
-        <button id="toggle-orientation">Horizontal</button>
+        <button id="toggle-orientation" aria-label="Toggle ship orientation">Horizontal</button>
         <span id="placement-hint"></span>
       </div>
     </div>
@@ -601,6 +660,7 @@ pointer-events: none;
       <span id="hud-hits">🔥 0</span>
       <span id="hud-misses">💦 0</span>
     </div>
+    <div id="powerups" aria-label="Power ups"></div>
     <div id="hud-last-move"></div>
   </div>
   <div id="action-log-panel" class="collapsed">
@@ -713,6 +773,8 @@ const difficulty = window.selectedDiff || 'easy';
     exp.style.position = 'fixed';
     document.body.appendChild(exp);
     exp.addEventListener('animationend', () => exp.remove());
+    document.getElementById('sfx-hit').currentTime = 0;
+    document.getElementById('sfx-hit').play().catch(()=>{});
   }
 
   // Show splash effect for misses
@@ -726,6 +788,8 @@ const difficulty = window.selectedDiff || 'easy';
     splash.style.position = 'fixed';
     document.body.appendChild(splash);
     splash.addEventListener('animationend', () => splash.remove());
+    document.getElementById('sfx-miss').currentTime = 0;
+    document.getElementById('sfx-miss').play().catch(()=>{});
   }
 
   // Fade out a sunk ship’s cells
@@ -751,6 +815,11 @@ const difficulty = window.selectedDiff || 'easy';
   const boardDiv = document.getElementById(boardId);
   boardDiv.innerHTML = '';
   boardDiv.className = 'grid board-grid'; // FIX: ensure correct CSS
+  if(!isPlayer){
+    const radar = document.createElement('div');
+    radar.className = 'radar-sweep';
+    boardDiv.appendChild(radar);
+  }
 
   // 2. Build 11x11 grid (first row/col = labels)
   for (let r = 0; r <= BOARD_SIZE; r++) {
@@ -803,14 +872,19 @@ const difficulty = window.selectedDiff || 'easy';
       currentShipIndex = parseInt(e.target.value);
       showPlacementHint();
     };
-    document.getElementById('toggle-orientation').onclick = () => {
-      placementOrientation = (placementOrientation === 'horizontal') ? 'vertical' : 'horizontal';
-      document.getElementById('toggle-orientation').textContent =
-        placementOrientation.charAt(0).toUpperCase() + placementOrientation.slice(1);
-      showPlacementHint();
-    };
+  document.getElementById('toggle-orientation').onclick = () => {
+    placementOrientation = (placementOrientation === 'horizontal') ? 'vertical' : 'horizontal';
+    document.getElementById('toggle-orientation').textContent =
+      placementOrientation.charAt(0).toUpperCase() + placementOrientation.slice(1);
     showPlacementHint();
-  }
+  };
+  document.addEventListener('keydown', e => {
+    if(e.key.toLowerCase() === 'r' && document.getElementById('main-controls').style.display !== 'none') {
+      document.getElementById('toggle-orientation').click();
+    }
+  });
+  showPlacementHint();
+}
 
   // Updates placement hint text
   function showPlacementHint() {
@@ -1270,15 +1344,18 @@ setTurnIndicator("Your Turn");
     document.getElementById("endgame-message").textContent = win
       ? "Congratulations, Admiral!" : "The enemy fleet prevailed. Try again!";
     document.getElementById("endgame-modal").classList.add("menu-modal-show");
+    document.getElementById('bg-music').pause();
+    const sfx = win ? document.getElementById('sfx-hit') : document.getElementById('sfx-miss');
+    sfx.currentTime = 0; sfx.play().catch(()=>{});
   }
   function hideEndgameModal() {
     document.getElementById("endgame-modal").classList.remove("menu-modal-show");
   }
   function showMainMenu() {
-  document.getElementById("main-menu").style.display = "flex";
-  document.getElementById("game-container").style.display = "none";
-  hideEndgameModal();
-}
+    document.getElementById("main-menu").style.display = "flex";
+    document.getElementById("game-container").style.display = "none";
+    hideEndgameModal();
+  }
   
   /* ==============================
      FULL GAME RESET/RESTART
@@ -1320,6 +1397,8 @@ function restartGame() {
   document.querySelectorAll('.salvo-selected').forEach(cell => cell.classList.remove('salvo-selected'));
   logAction("Game restarted. Place your ships!", "log-player");
   updateHUD();
+  const music = document.getElementById('bg-music');
+  if (music.paused) { music.volume = 0.4; music.play().catch(()=>{}); }
 }
   function setTurnIndicator(msg) {
     document.getElementById('turn-indicator').textContent = msg || '';
@@ -1340,13 +1419,25 @@ function restartGame() {
   };
   // On page load: show menu and setup controls
   window.onload = function() {
+    document.getElementById('intro-screen').style.display = 'flex';
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('game-container').style.display = 'none';
+  };
+  document.getElementById('intro-start').onclick = function(){
+    document.getElementById('intro-screen').classList.add('hide');
     showMainMenu();
     restartGame();
+    document.getElementById('bg-music').play().catch(()=>{});
   };
   confirmSalvoBtn.onclick = function() {
     confirmSalvoBtn.style.display = 'none';
     applyPlayerSalvoShots();
   };
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && confirmSalvoBtn.style.display !== 'none') {
+      confirmSalvoBtn.click();
+    }
+  });
   // Starfield
   const canvas = document.getElementById('starfield');
   const ctx = canvas.getContext('2d');
@@ -1456,6 +1547,17 @@ function updateHUD() {
     document.getElementById("hud-enemy-ships").textContent = `🛳 ${aiShips.length}`;
     document.getElementById("hud-hits").textContent = `🔥 ${countPlayerHits()}`;
     document.getElementById("hud-misses").textContent = `💦 ${countPlayerMisses()}`;
+    const pwrap = document.getElementById('powerups');
+    if(pwrap){
+      pwrap.innerHTML = '';
+      const icons = Math.floor(countPlayerHits()/3);
+      for(let i=0;i<icons;i++){
+        const span=document.createElement('span');
+        span.className='power-icon';
+        span.textContent='💡';
+        pwrap.appendChild(span);
+      }
+    }
 }
 
 function setHUDTurn(turn) {
