@@ -69,31 +69,35 @@
       transition: flex-direction 0.3s ease;
     }
     .grid {
-      background: rgba(26, 42, 59, 0.75);
-      border-radius: 12px;
+      background: rgba(26, 42, 59, 0.55);
+      border-radius: 16px;
       border: 1.5px solid #66e0ffaa;
-      box-shadow: 0 4px 18px #2ad8ff33, 0 0 6px #113c5a66 inset;
+      box-shadow:
+        0 4px 18px #2ad8ff33,
+        0 0 6px #113c5a66 inset,
+        0 0 40px #1fffd533 inset;
       width: 300px;
       height: 300px;
       display: grid;
       grid-template-columns: repeat(11, 1fr);
       grid-template-rows: repeat(11, 1fr);
       gap: 2px;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(8px) brightness(1.05);
     }
     .cell {
-      background: rgba(34, 51, 68, 0.85);
+      background: linear-gradient(135deg, rgba(34,51,68,0.85), rgba(44,61,78,0.85));
       border: 1px solid #334455;
-      border-radius: 4px;
+      border-radius: 6px;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 1.2rem;
       min-width: 0;
       min-height: 0;
-      transition: background 0.25s;
+      transition: background 0.25s, transform 0.2s;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 2px 5px #0005;
     }
     /* === BOARD LABELS === */
     .cell.label-cell { background: #112233; font-weight: bold; color: #3fffd7; }
@@ -109,6 +113,10 @@
     .hit { background: #ff6464; }
     .miss { background: #113a44; }
     .salvo-selected { outline: 2px solid #fff9b4; background: #bbb820 !important; }
+    .cell:not(.label-cell):hover {
+      background-color: rgba(85, 120, 170, 0.35);
+      transform: scale(1.05);
+    }
       #enemy-board .cell:hover:not(.label-cell):not(.hit):not(.miss) {
         cursor: crosshair;
         background-color: rgba(75,110,175,0.3);
@@ -232,12 +240,13 @@ position: relative;   /* This is important for z-index to work! */
   max-width: 500px;
   height: 35px;
   font-size: 0.97rem;
-  background: rgba(20,38,55,0.92);
-  border-radius: 12px;
-  box-shadow: 0 2px 12px #21fff655;
-  padding: 6px 10px 3px 10px;
+  background: rgba(20,38,55,0.82);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px #21fff655;
+  padding: 6px 12px 4px 12px;
   border: 1px solid #00ffeebb;
   box-sizing: border-box;
+  backdrop-filter: blur(6px);
 }
 #hud-panel .hud-stats {
   line-height: 1.1;  
@@ -407,6 +416,7 @@ z-index: 10;
   font-size: 1.16rem;
   margin-bottom: 5px;
   letter-spacing: 1.5px;
+  text-shadow: 0 1px 6px #1fffd566;
 }
 
 .board-grid {
@@ -421,6 +431,10 @@ z-index: 10;
   align-items: center;
   gap: 18px;
   margin-top: 28px;
+  background: rgba(25,40,62,0.8);
+  padding: 14px 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px #23e0ff33;
 }
 .control-panel button {
   background: linear-gradient(135deg, #1de9ff, #00bcd4);
@@ -430,7 +444,7 @@ z-index: 10;
   color: #042630;
   font-weight: 600;
   border-radius: 10px;
-  box-shadow: 0 3px 10px #00fff566;
+  box-shadow: 0 3px 12px #00fff566;
   font-size: 1.1rem;
   cursor: pointer;
   transition: background 0.15s, transform 0.15s;
