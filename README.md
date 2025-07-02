@@ -731,6 +731,7 @@ const difficulty = window.selectedDiff || 'easy';
   let playerShips = [];
   let gameMode = 'classic';
   let pendingPlayerShots = [];
+  let hoveredCell = null; // Track which board cell is under the mouse
   const bgMusic = document.getElementById('bg-music');
   const hitSound = document.getElementById('hit-sound');
 const confirmSalvoBtn = document.getElementById('confirm-salvo');
@@ -850,6 +851,9 @@ confirmSalvoBtn.onclick = () => {
         cell.tabIndex = 0;
         cell.setAttribute('role','gridcell');
         cell.setAttribute('aria-label', `${String.fromCharCode(64+r)}${c}`);
+        // Track hover for keyboard firing/placement
+        cell.addEventListener('mouseenter', () => { hoveredCell = cell; });
+        cell.addEventListener('mouseleave', () => { if(hoveredCell === cell) hoveredCell = null; });
         // Hook up correct event handlers
         if (isPlayer) {
           playerBoard[r - 1][c - 1].cellElem = cell;
@@ -926,6 +930,7 @@ confirmSalvoBtn.onclick = () => {
 
   // Preview ship placement on hover
   function handleCellHover(e) {
+    hoveredCell = e.target;
     if (shipsPlaced || shipsToPlace.length === 0) return;
     const row = parseInt(e.target.dataset.row);
     const col = parseInt(e.target.dataset.col);
@@ -945,6 +950,7 @@ confirmSalvoBtn.onclick = () => {
 
   // Remove preview when mouse leaves cell
   function handleCellUnhover(e) {
+    if(hoveredCell === e.target) hoveredCell = null;
     if (shipsToPlace.length === 0) return;
     const row = parseInt(e.target.dataset.row);
     const col = parseInt(e.target.dataset.col);
@@ -1461,6 +1467,12 @@ function restartGame() {
     if(e.key.toLowerCase() === 'r' && document.getElementById('main-controls').style.display !== 'none') {
       e.preventDefault();
       document.getElementById('toggle-orientation').click();
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if((e.key === 'Enter' || e.key === ' ') && hoveredCell && confirmSalvoBtn.style.display === 'none') {
+      e.preventDefault();
+      hoveredCell.click();
     }
   });
   // Starfield
