@@ -688,6 +688,12 @@ pointer-events: none;
   cursor: pointer;
   box-shadow: 0 2.5px 10px #18e5f911;
   transition: box-shadow 0.18s, background 0.16s, border 0.19s, color 0.18s, transform 0.12s;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23e9fcff' d='M0 0L5 6L10 0Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
 .halo-select:hover, .halo-select:focus {
   color: #57c1ff;
@@ -701,6 +707,15 @@ pointer-events: none;
 .halo-select:active {
   transform: scale(0.98);
   animation: clickDownUp 0.3s;
+}
+.halo-select.open {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23e9fcff' d='M0 6L5 0L10 6Z'/%3E%3C/svg%3E");
+  animation: dropdownOpen 0.3s;
+}
+@keyframes dropdownOpen {
+  0% { transform: scale(0.96); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 .halo-btn {
     min-width: 92px;
@@ -1838,6 +1853,11 @@ function restartGame() {
     localStorage.setItem('bs-theme', selectedTheme);
     applyTheme(selectedTheme);
   };
+
+  document.querySelectorAll('.halo-select').forEach(sel => {
+    sel.addEventListener('mousedown', () => sel.classList.add('open'));
+    sel.addEventListener('blur', () => sel.classList.remove('open'));
+  });
 
   function applyTheme(theme) {
     document.body.classList.remove('theme-navy','theme-scifi','theme-pirate');
