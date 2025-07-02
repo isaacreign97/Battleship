@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;family=Orbitron:wght@400;700&amp;display=swap" rel="stylesheet">
 
   <title>Battleship Ultra</title>
   
@@ -100,6 +100,16 @@
     .hit { background: #ff6464; }
     .miss { background: #113a44; }
     .salvo-selected { outline: 2px solid #fff9b4; background: #bbb820 !important; }
+      #enemy-board .cell:hover:not(.label-cell):not(.hit):not(.miss) {
+        cursor: crosshair;
+        background-color: rgba(75,110,175,0.3);
+      }
+      #enemy-board .cell:hover:not(.label-cell):not(.hit):not(.miss)::after {
+        content: "🎯";
+        position: absolute;
+        font-size: 1.2rem;
+        pointer-events: none;
+      }
     /* === ANIMATION ICONS === */
     .explosion, .splash, .missile {
       pointer-events: none;
@@ -578,6 +588,7 @@ pointer-events: none;
         <button id="toggle-orientation">Horizontal</button>
         <span id="placement-hint"></span>
       </div>
+    </div>
 <!-- ======================
      HUD PANEL + ACTION LOG
      ====================== -->
