@@ -94,11 +94,17 @@
       font-size: 1.2rem;
       min-width: 0;
       min-height: 0;
-      transition: background 0.25s, transform 0.2s;
+      transition: background 0.25s, transform 0.2s, box-shadow 0.2s;
       position: relative;
       overflow: hidden;
       box-shadow: 0 2px 5px #0005;
     }
+    .cell:active { transform: scale(0.95); }
+    .cell-icon {
+      pointer-events: none;
+      transition: transform 0.2s;
+    }
+    .ship .cell-icon { font-size: 1.1rem; }
     /* === BOARD LABELS === */
     .cell.label-cell { background: #112233; font-weight: bold; color: #3fffd7; }
     .cell.corner-cell { background: #19283e; }
@@ -115,8 +121,8 @@
     @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
     .fading-out { animation: fadeout 1.2s forwards; }
     @keyframes fadeout { from { opacity: 1; } to { opacity: 0.15; background: #d80; }}
-    .hit { background: #ff6464; }
-    .miss { background: #113a44; }
+    .hit { background: #ff6464; transition: background 0.3s; }
+    .miss { background: #113a44; transition: background 0.3s; }
     .salvo-selected { outline: 2px solid #fff9b4; background: #bbb820 !important; }
     .cell:not(.label-cell):hover {
       background-color: rgba(85, 120, 170, 0.35);
@@ -174,12 +180,14 @@
       box-shadow: 0 3px 10px #00fff566;
       font-size: 1.1rem;
       cursor: pointer;
-      transition: background 0.15s, transform 0.15s;
+      transition: background 0.15s, transform 0.15s, box-shadow 0.2s;
     }
     .control-panel button:hover {
       background: linear-gradient(135deg, #00d4ff, #0099c3);
       transform: translateY(-2px);
+      box-shadow: 0 5px 15px #00fff544;
     }
+    .control-panel button:active { transform: translateY(1px); }
     /* === MODALS/MENU OVERLAYS === */
     .menu-modal-show { display: flex !important; }
     .menu-modal, #main-menu { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f1b2bdc; z-index: 2000;}
@@ -190,8 +198,9 @@
     }
     .menu-visible { display: flex !important; }
     .menu-hidden { display: none !important; }
-    .modal-btn { margin: 10px; padding: 12px 32px; border-radius: 8px; background: #00ffff; color: #132437; border: none; font-weight: 700; font-size: 1.1rem;}
-    .modal-btn:hover { background: #00bbbb; }
+    .modal-btn { margin: 10px; padding: 12px 32px; border-radius: 8px; background: #00ffff; color: #132437; border: none; font-weight: 700; font-size: 1.1rem; transition: background 0.15s, transform 0.15s; }
+    .modal-btn:hover { background: #00bbbb; transform: translateY(-2px); }
+    .modal-btn:active { transform: translateY(1px); }
     /* Enhanced endgame styles */
     #endgame-icon { font-size: 3rem; margin-bottom: 8px; }
     #endgame-stats { margin: 10px 0; font-size: 1.1rem; text-align: center; }
@@ -366,7 +375,10 @@ position: relative;   /* This is important for z-index to work! */
   justify-content: center;
   gap: 7px;
   cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
 }
+#action-log-tab:hover { background: #215b68; transform: translateY(-1px); }
+#action-log-tab:active { transform: translateY(1px); }
 
 #action-log-arrow {
   font-size: 1.2em;
@@ -609,6 +621,7 @@ pointer-events: none;
     outline: none;
     z-index: 1;
   }
+  .halo-btn:active { transform: scale(0.98); }
   .halo-btn::after {
     content: "";
     position: absolute; left: 0; right: 0; top: 0; bottom: 0;
@@ -785,11 +798,11 @@ applyTheme(theme);
 window.selectedTheme = theme;
   const BOARD_SIZE = 10;
   const SHIPS = [
-    { name: "Carrier", size: 5 },
-    { name: "Battleship", size: 4 },
-    { name: "Cruiser", size: 3 },
-    { name: "Submarine", size: 3 },
-    { name: "Destroyer", size: 2 },
+    { name: "Carrier", size: 5, icon: "🛳" },
+    { name: "Battleship", size: 4, icon: "🚢" },
+    { name: "Cruiser", size: 3, icon: "🚤" },
+    { name: "Submarine", size: 3, icon: "🛥" },
+    { name: "Destroyer", size: 2, icon: "⛵" },
   ];
 
   // Main game state (reset in restartGame)
@@ -1006,7 +1019,7 @@ document.addEventListener('visibilitychange', () => {
     shipsToPlace.forEach((ship, idx) => {
       const opt = document.createElement('option');
       opt.value = idx;
-      opt.textContent = `${ship.name} (${ship.size})`;
+      opt.textContent = `${ship.icon} ${ship.name} (${ship.size})`;
       shipSelect.appendChild(opt);
     });
     shipSelect.disabled = shipsToPlace.length === 0;
@@ -1026,7 +1039,8 @@ document.addEventListener('visibilitychange', () => {
   // Updates placement hint text
   function showPlacementHint() {
     if (shipsToPlace.length > 0) {
-      const hint = `Placing: ${shipsToPlace[currentShipIndex].name} (${shipsToPlace[currentShipIndex].size}) - ${placementOrientation}`;
+      const ship = shipsToPlace[currentShipIndex];
+      const hint = `Placing: ${ship.icon} ${ship.name} (${ship.size}) - ${placementOrientation}`;
       document.getElementById('placement-hint').textContent = hint;
     } else {
       document.getElementById('placement-hint').textContent = '';
@@ -1099,6 +1113,7 @@ document.addEventListener('visibilitychange', () => {
       let c = col + (placementOrientation === 'horizontal' ? i : 0);
       playerBoard[r][c].hasShip = true;
       playerBoard[r][c].cellElem.classList.add('ship');
+      setCellIcon(playerBoard[r][c].cellElem, ship.icon);
       fadeInShip(playerBoard[r][c].cellElem); // Placement animation
       playerBoard[r][c].cellElem.classList.remove('ship-preview', 'bad-placement');
       newShip.positions.push({ r, c });
