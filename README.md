@@ -36,12 +36,16 @@
     body.theme-navy h1, body.theme-navy .grid-label { color: #1cdad7; }
     body.theme-pirate h1, body.theme-pirate .grid-label { color: #ffbf00; }
     h1 {
-    font-family: "Orbitron", "Segoe UI", Arial, sans-serif;
+      font-family: "Orbitron", "Segoe UI", Arial, sans-serif;
       margin-bottom: 10px;
       font-size: 3rem;
-      color: #3fffd7;
-      text-shadow: 0 3px 22px #21a0a8cc, 0 1px 0 #0114;
       text-align: center;
+    }
+    .title-text {
+      background: linear-gradient(90deg, #3fffd7, #00ff88);
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 3px 22px #21a0a8cc, 0 1px 0 #0114;
     }
     h2, h3#turn-indicator, .grid-title {
       text-align: center;
@@ -69,15 +73,15 @@
       transition: flex-direction 0.3s ease;
     }
     .grid {
-      background: rgba(26, 42, 59, 0.55);
+      background: rgba(20, 40, 40, 0.55);
       border-radius: 16px;
-      border: 1.5px solid #66e0ffaa;
+      border: 1.5px solid #00e0a0aa;
       box-shadow:
-        0 4px 18px #2ad8ff33,
-        0 0 6px #113c5a66 inset,
-        0 0 40px #1fffd533 inset;
-      width: 300px;
-      height: 300px;
+        0 4px 18px #00ff8844,
+        0 0 6px #0a3b3b66 inset,
+        0 0 40px #00ff8844 inset;
+      width: min(40vmin, 360px);
+      height: min(40vmin, 360px);
       display: grid;
       grid-template-columns: repeat(11, 1fr);
       grid-template-rows: repeat(11, 1fr);
@@ -448,7 +452,9 @@ z-index: 10;
   width: 225px;
   text-align: center;
   font-weight: bold;
-  color: #20fff6;
+  color: transparent;
+  background: linear-gradient(90deg, #20fff6, #00ff88);
+  -webkit-background-clip: text;
   font-size: 1.16rem;
   margin-bottom: 5px;
   letter-spacing: 1.5px;
@@ -697,7 +703,7 @@ pointer-events: none;
   <audio id="hit-sound" src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3" preload="auto"></audio>
 
   <div id="intro-screen">
-    <h1>Battleship Ultra</h1>
+    <h1 class="title-text">Battleship Ultra</h1>
     <button id="intro-start" aria-label="Enter game">Enter</button>
   </div>
 
@@ -756,7 +762,7 @@ pointer-events: none;
       MAIN GAME CONTAINER (hidden by default)
       ========================= -->
   <div id="game-container" style="display: flex;">
-<h1>Battleship Ultra</h1>
+<h1 class="title-text">Battleship Ultra</h1>
   <h3 id="turn-indicator"></h3>
   <div id="messages" role="status" aria-live="polite"></div>
     <!-- === SHIP PLACEMENT CONTROLS === -->
@@ -1154,7 +1160,7 @@ document.addEventListener('visibilitychange', () => {
     const col = parseInt(e.target.dataset.col);
     const ship = shipsToPlace[currentShipIndex];
     if (!canPlaceShip(row, col, ship.size, placementOrientation)) {
-      showMessage("Invalid placement. Try again.");
+      showMessage("Position denied. Choose a valid location.");
       return;
     }
     let newShip = { name: ship.name, positions: [] };
@@ -1175,11 +1181,11 @@ document.addEventListener('visibilitychange', () => {
     if (shipsToPlace.length === 0) {
   document.getElementById('placement-controls').style.display = 'none';
   shipsPlaced = true;
-      showMessage('All ships placed! Begin attacks.');
+      showMessage('All ships deployed. Awaiting firing orders.');
       setTurnIndicator("Your Turn");
       if (gameMode === "salvo") {
         pendingPlayerShots = [];
-        showMessage(`Your turn! Select ${countUnsunkShips(playerShips, playerBoard)} shots.`);
+        showMessage(`Your move, Commander. Allocate ${countUnsunkShips(playerShips, playerBoard)} salvo${countUnsunkShips(playerShips, playerBoard) > 1 ? 's' : ''}.`);
       }
     } else {
       setupPlacementControls();
@@ -1286,9 +1292,13 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
       logAction(`${isPlayer ? 'Player' : 'AI'} hit at ${rowLabel}${colLabel}`, isPlayer ? "log-player" : "log-ai");
       if (isShipSunk(enemyShips, row, col, enemyBoard)) {
         let name = markSunkShip(enemyShips, enemyBoard, boardToUpdate, row, col);
-        showMessage((isPlayer ? "You sank" : "AI sank") + ` the ${isPlayer ? "AI's" : "your"} ${name}!`);
+        if(isPlayer) {
+          showMessage(`Target neutralized! Enemy ${name} destroyed.`);
+        } else {
+          showMessage(`Our ${name} has been sunk!`);
+        }
       } else {
-        showMessage(isPlayer ? "You hit an AI ship!" : "AI hit your ship!");
+        showMessage(isPlayer ? "Direct hit on enemy vessel!" : "Enemy shot landed on our ship!");
         logAction(`${isPlayer ? "You" : "AI"} sunk a ship!`, "log-sink");
       }
     } else {
@@ -1297,7 +1307,7 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
       boardToUpdate[row][col].miss = true;
       enemyBoard[row][col].miss = true;
       showSplash(boardToUpdate[row][col].cellElem);
-      showMessage(isPlayer ? "You missed!" : "AI missed!");
+      showMessage(isPlayer ? "Shot missed the target." : "Enemy shot fell short.");
       logAction(`${isPlayer ? 'Player' : 'AI'} missed at ${rowLabel}${colLabel}`, isPlayer ? "log-player" : "log-ai");
     }
      updateHUD();
@@ -1322,7 +1332,7 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
         e.target.classList.remove('salvo-selected');
       } else {
         if (pendingPlayerShots.length >= shotsAllowed) {
-          showMessage(`You can only select ${shotsAllowed} shot${shotsAllowed > 1 ? 's' : ''} per turn.`);
+          showMessage(`Limit reached: ${shotsAllowed} salvo${shotsAllowed > 1 ? 's' : ''} max.`);
           return;
         }
         pendingPlayerShots.push({ r: row, c: col });
@@ -1336,9 +1346,9 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
         confirmSalvoBtn.style.display = 'none';
       }
       if (pendingPlayerShots.length < shotsAllowed) {
-        showMessage(`Select ${shotsAllowed - pendingPlayerShots.length} more shot${shotsAllowed - pendingPlayerShots.length > 1 ? 's' : ''}.`);
+        showMessage(`Select ${shotsAllowed - pendingPlayerShots.length} more coordinate${shotsAllowed - pendingPlayerShots.length > 1 ? 's' : ''}.`);
       } else if (pendingPlayerShots.length === shotsAllowed) {
-        showMessage(`Click "Confirm Shots" to fire!`);
+        showMessage(`Press \"Confirm Shots\" to open fire.`);
       }
       return;
     }
@@ -1436,7 +1446,7 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
         return;
       }
       setTurnIndicator("Your Turn");
-      showMessage("Your turn! Take a shot!");
+      showMessage("Your turn, Commander. Fire when ready!");
     }, true); // ROTATE AI MISSILE!
   }
 
@@ -1486,7 +1496,7 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
         }, true); // ROTATE AI MISSILE!
       } else {
 setTurnIndicator("Your Turn");
-        showMessage(`Your turn! Select ${countUnsunkShips(playerShips, playerBoard)} shot(s).`);
+        showMessage(`Commander, select ${countUnsunkShips(playerShips, playerBoard)} target${countUnsunkShips(playerShips, playerBoard) > 1 ? 's' : ''}.`);
       }
     }
     aiDoNextShot();
@@ -1497,7 +1507,7 @@ setTurnIndicator("Your Turn");
      ============================== */
   // Show a message to the player
   function showMessage(msg) {
-    document.getElementById('messages').textContent = msg;
+    document.getElementById('messages').textContent = `STATUS: ${msg}`;
   }
   function randomInt(max) { return Math.floor(Math.random() * max); }
 
@@ -1611,7 +1621,7 @@ function restartGame() {
   document.getElementById('placement-controls').style.display = 'flex';
   setupPlacementControls();
   placeAIShips();
-  showMessage('Place your ships and start the game!');
+  showMessage('Deploy your fleet to commence battle.');
   setTurnIndicator('');
   hideEndgameModal();
   document.querySelectorAll('.salvo-selected').forEach(cell => cell.classList.remove('salvo-selected'));
