@@ -20,6 +20,7 @@
   <style>
     /* === GLOBAL RESET === */
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: clamp(14px, 2.2vmin, 18px); }
     body {
       font-family: "Roboto", Arial, sans-serif;
       background-color: #0f1b2b;
@@ -95,7 +96,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 1.2rem;
+      font-size: clamp(0.9rem, 1.8vmin, 1.4rem);
       min-width: 0;
       min-height: 0;
       transition: background 0.25s, transform 0.2s, box-shadow 0.2s;
@@ -536,7 +537,7 @@ z-index: 10;
   color: transparent;
   background: linear-gradient(90deg, #20fff6, #00ff88);
   -webkit-background-clip: text;
-  font-size: 1.16rem;
+  font-size: clamp(1rem, 2vmin, 1.4rem);
   margin-bottom: 5px;
   letter-spacing: 1.5px;
   text-shadow: 0 1px 6px #1fffd566;
