@@ -279,7 +279,10 @@
       { name: 'Destroyer', size: 2 },
     ];
 
-    const createBoard = () => Array(10).fill(0).map(() => Array(10).fill({ ship: null, hit: false, miss: false }));
+    const createBoard = () =>
+      Array.from({ length: 10 }, () =>
+        Array.from({ length: 10 }, () => ({ ship: null, hit: false, miss: false }))
+      );
 
     function cloneBoard(board) {
       return board.map(row => row.map(cell => ({ ...cell })));
@@ -388,14 +391,20 @@
       };
 
       useEffect(() => {
-        if (!playerTurn && placingIndex >= SHIPS.length) {
+        if (!playerTurn && placingIndex >= SHIPS.length && !result) {
           const timer = setTimeout(() => aiMove(), 500);
           return () => clearTimeout(timer);
         }
-      }, [playerTurn, aiTargets, placingIndex]);
+      }, [playerTurn, aiTargets, placingIndex, result]);
 
       const aiMove = () => {
         const board = cloneBoard(playerBoard);
+
+        const allAttacked = board.every(row =>
+          row.every(cell => cell.hit || cell.miss)
+        );
+        if (allAttacked) return;
+
         let tx, ty;
         while (true) {
           if (aiTargets.length) {
