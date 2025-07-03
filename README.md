@@ -127,6 +127,7 @@
     @keyframes fadeout { from { opacity: 1; } to { opacity: 0.15; background: #d80; }}
     .hit { background: #ff6464; transition: background 0.3s; }
     .miss { background: #113a44; transition: background 0.3s; }
+    .pending { background: #334455; }
     .salvo-selected { outline: 2px solid #fff9b4; background: #bbb820 !important; }
     .cell:not(.label-cell):hover {
       background-color: rgba(85, 120, 170, 0.35);
@@ -847,7 +848,9 @@ pointer-events: none;
 
 
 
-  </style>
+</style>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto" loop></audio>
@@ -893,6 +896,7 @@ pointer-events: none;
       <select id="mode-select" class="menu-select" aria-label="Game mode">
         <option value="classic" selected>Classic</option>
         <option value="salvo">Salvo</option>
+        <option value="online">Online</option>
       </select>
     </div>
     <div class="halo-menu-options" style="margin-top:18px;">
@@ -1049,6 +1053,24 @@ window.selectedTheme = theme;
   const powerTypes = ['cluster','sonar'];
   let nextPowerupIndex = 0;
 const AI_PROB = {easy:0, medium:0.3, hard:0.5, advanced:0.8, god:0.9};
+// === Firebase Realtime Support ===
+let db = null;        // Firestore instance
+let gameDoc = null;   // Current game document reference
+let onlineRole = null; // 'host' or 'guest'
+let onlineMoveId = 0;  // Incrementing id for moves
+let onlineReady = false;
+let opponentReady = false;
+let gameStartedOnline = false;
+
+function initFirebase(){
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+}
 const createBoard = () =>
   Array.from({length: BOARD_SIZE}, () =>
     Array.from({length: BOARD_SIZE}, () => ({hasShip:false, hit:false, miss:false, cellElem:null}))
@@ -1105,6 +1127,96 @@ function updateClock(){
 }
 setInterval(updateClock,1000);
 updateClock();
+
+// === Online Multiplayer Helpers ===
+async function startOnlineGame(){
+  initFirebase();
+  const host = confirm('Host a new online match? Click Cancel to join one.');
+  const games = db.collection('games');
+  if(host){
+    const ref = await games.add({hostReady:false,guestReady:false,turn:'host'});
+    onlineRole = 'host';
+    gameDoc = ref;
+    alert('Share this game ID with your opponent: '+ref.id);
+  }else{
+    const id = prompt('Enter game ID');
+    if(!id) return false;
+    const ref = games.doc(id);
+    const snap = await ref.get();
+    if(!snap.exists){ alert('Game not found'); return false; }
+    onlineRole = 'guest';
+    gameDoc = ref;
+  }
+  gameDoc.onSnapshot(onOnlineUpdate);
+  return true;
+}
+
+function boardToCoords(board){
+  const coords=[];
+  for(let r=0;r<BOARD_SIZE;r++)
+    for(let c=0;c<BOARD_SIZE;c++)
+      if(board[r][c].hasShip) coords.push([r,c]);
+  return coords;
+}
+
+async function submitOnlineBoard(){
+  if(!gameDoc) return;
+  const data = onlineRole==='host'? {hostBoard:boardToCoords(playerBoard),hostReady:true}
+                                 : {guestBoard:boardToCoords(playerBoard),guestReady:true};
+  await gameDoc.update(data);
+  onlineReady = true;
+}
+
+async function sendOnlineShot(r,c){
+  if(!gameDoc) return;
+  onlineMoveId++;
+  await gameDoc.update({lastMove:{id:onlineMoveId,player:onlineRole,r,c,result:null},turn:onlineRole==='host'?'guest':'host'});
+}
+
+async function onOnlineUpdate(doc){
+  const data = doc.data();
+  opponentReady = onlineRole==='host' ? data.guestReady : data.hostReady;
+  if(data.hostReady && data.guestReady && !gameStartedOnline){
+    gameStartedOnline = true;
+    setTurnIndicator(data.turn===onlineRole ? 'Your Turn' : "Opponent's Turn");
+  }
+  if(data.winner){
+    endGame(data.winner===onlineRole);
+    return;
+  }
+  if(data.lastMove && data.lastMove.id>onlineMoveId){
+    const mv=data.lastMove;
+    onlineMoveId=mv.id;
+    if(mv.player!==onlineRole && mv.result===null){
+      const hit=playerBoard[mv.r][mv.c].hasShip;
+      fireAtCell(playerBoard, playerBoard, playerShips, mv.r, mv.c, false);
+      const win=areAllShipsSunk(playerBoard);
+      await gameDoc.update({lastMove:{...mv,result:hit?'hit':'miss'},winner:win?mv.player:null,turn:win?mv.player:onlineRole});
+      if(win) endGame(false);
+      else setTurnIndicator('Your Turn');
+    } else if(mv.player!==onlineRole && mv.result){
+      // Opponent answered our shot
+      applyOnlineResult(mv);
+    }
+  }
+}
+
+function applyOnlineResult(mv){
+  const cell=enemyBoard[mv.r][mv.c];
+  cell.cellElem.classList.remove('pending');
+  if(mv.result==='hit'){
+    cell.hit=true; cell.cellElem.classList.add('hit');
+    setCellIcon(cell.cellElem,'💥');
+    showExplosion(cell.cellElem);
+  }else{
+    cell.miss=true; cell.cellElem.classList.add('miss');
+    setCellIcon(cell.cellElem,'⚪');
+    showSplash(cell.cellElem);
+  }
+  if(mv.winner===onlineRole) endGame(true);
+  else setTurnIndicator("Opponent's Turn");
+  updateHUD();
+}
 
 // --- Audio Control Handlers ---
 function updateMuteIcon() {
@@ -1447,6 +1559,7 @@ document.addEventListener('visibilitychange', () => {
   shipsPlaced = true;
       showMessage('All ships deployed. Awaiting firing orders.');
       setTurnIndicator("Your Turn");
+      if(gameMode === 'online') submitOnlineBoard();
       if (gameMode === "salvo") {
         pendingPlayerShots = [];
         showMessage(`Your move, Commander. Allocate ${countUnsunkShips(playerShips, playerBoard)} salvo${countUnsunkShips(playerShips, playerBoard) > 1 ? 's' : ''}.`);
@@ -1657,15 +1770,21 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
 
   // Fire a single classic shot
   function playerFireSingleShot(row, col) {
-    if (enemyBoard[row][col].hit || enemyBoard[row][col].miss) return;
-    fireAtCell(enemyBoard, aiBoard, aiShips, row, col, true);
-
-    if (areAllShipsSunk(aiBoard)) {
-      endGame(true);
-      return;
+    if (enemyBoard[row][col].hit || enemyBoard[row][col].miss || enemyBoard[row][col].pending) return;
+    if(gameMode === 'online'){
+      enemyBoard[row][col].pending = true;
+      enemyBoard[row][col].cellElem.classList.add('pending');
+      sendOnlineShot(row,col);
+      setTurnIndicator("Opponent's Turn");
+    } else {
+      fireAtCell(enemyBoard, aiBoard, aiShips, row, col, true);
+      if (areAllShipsSunk(aiBoard)) {
+        endGame(true);
+        return;
+      }
+      setTurnIndicator("AI's Turn");
+      setTimeout(aiAttackPlayer, 500);
     }
-    setTurnIndicator("AI's Turn");
-    setTimeout(aiAttackPlayer, 500);
   }
 
   /* ==============================
@@ -1853,6 +1972,10 @@ function restartGame() {
   activePowerup = null;
   hitsForPower = 3;
   nextPowerupIndex = 0;
+  onlineReady = false;
+  opponentReady = false;
+  gameStartedOnline = false;
+  onlineMoveId = 0;
   turnNumber = 0;
   // Set up boards
   playerBoard = createBoard();
@@ -1864,8 +1987,14 @@ function restartGame() {
   document.getElementById('main-controls').style.display = 'flex';
   document.getElementById('placement-controls').style.display = 'flex';
   setupPlacementControls();
-  placeAIShips();
-  showMessage('Deploy your fleet to commence battle.');
+  if(gameMode !== 'online'){
+    placeAIShips();
+  }
+  if(gameMode !== 'online'){
+    showMessage('Deploy your fleet to commence battle.');
+  } else {
+    showMessage('Deploy your fleet while waiting for opponent...');
+  }
   setTurnIndicator('');
   hideEndgameModal();
   document.querySelectorAll('.salvo-selected').forEach(cell => cell.classList.remove('salvo-selected'));
@@ -2006,11 +2135,14 @@ function restartGame() {
       document.getElementById('game-container').style.display = "flex";
     // Your start game logic here (call your game init/restart logic as needed)
     if(typeof restartGame === "function") {
-      // Assign selected mode/difficulty to your game's variables!
       gameMode = selectedMode;
       aiDifficulty = selectedDiff;
       applyTheme(selectedTheme);
-      restartGame();
+      if(gameMode === 'online'){
+        startOnlineGame().then(ok=>{ if(ok) restartGame(); else showMainMenu(); });
+      } else {
+        restartGame();
+      }
     }
   };
 
@@ -2058,7 +2190,9 @@ function useClusterBomb(row,col){
         setTimeout(next,200);
       });
     } else {
-      if(areAllShipsSunk(aiBoard)){ endGame(true); } else { setTurnIndicator("AI's Turn"); setTimeout(aiAttackPlayer,500); }
+      if(gameMode==='online'){
+        setTurnIndicator("Opponent's Turn");
+      } else if(areAllShipsSunk(aiBoard)){ endGame(true); } else { setTurnIndicator("AI's Turn"); setTimeout(aiAttackPlayer,500); }
     }
   }
   next();
@@ -2080,7 +2214,7 @@ function useSonarPulse(row,col){
       }
     }
   }
-  setTimeout(()=>{ if(areAllShipsSunk(aiBoard)){ endGame(true); } else { setTurnIndicator("AI's Turn"); setTimeout(aiAttackPlayer,500); } }, 850);
+  setTimeout(()=>{ if(gameMode==='online'){ setTurnIndicator('Opponent\'s Turn'); } else if(areAllShipsSunk(aiBoard)){ endGame(true); } else { setTurnIndicator("AI's Turn"); setTimeout(aiAttackPlayer,500); } }, 850);
 }
 
 // --- Example HUD and Log Functions ---
