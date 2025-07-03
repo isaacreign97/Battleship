@@ -263,49 +263,13 @@
     /* === MESSAGE AREAS === */
     #messages { min-height: 1.2em; text-align: center; font-size: 1.1rem; margin: 12px auto 0 auto; }
     #placement-hint { text-align: center; font-size: 1.15rem; color: #3fffd7; min-height: 1.2em; }
-    /* -- Collapsible Placement Panel -- */
-    #placement-panel {
-      min-width: 210px;
-      max-width: 380px;
-      font-size: 0.97rem;
-      background: rgba(20,38,55,0.92);
-      border-radius: 12px;
-      box-shadow: 0 2px 12px #21fff655;
-      border: 1.5px solid #00ffeebb;
-      margin: 16px 0 10px;
-      transition: max-height 0.3s cubic-bezier(0.4, 0.2, 0.3, 1), box-shadow 0.2s;
-      overflow: hidden;
-      max-height: 52px;
-      cursor: pointer;
-    }
-    #placement-panel.expanded { max-height: 180px; box-shadow: 0 4px 18px #00fff644; }
-    #placement-tab {
-      background: #1a3e4a;
-      color: #3fffd7;
-      font-size: 1.06rem;
-      font-weight: 600;
-      text-align: center;
-      padding: 7px 0 6px 0;
-      border-radius: 10px 10px 0 0;
-      border-bottom: 1.5px solid #1fffd7aa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      transition: background 0.2s, transform 0.15s;
-    }
-    #placement-tab:hover { background: #215b68; animation: bounceUpDown 0.6s infinite; }
-    #placement-tab:active { animation: clickDownUp 0.3s; }
-    #placement-arrow { font-size: 1.2em; transition: transform 0.2s; }
-    #placement-panel.expanded #placement-arrow { transform: rotate(180deg); }
+    /* -- Ship Placement Controls -- */
     #placement-controls {
       display: flex;
-      gap: 16px;
+      gap: 18px;
       justify-content: center;
       align-items: center;
-      padding: 12px 16px;
-      background: rgba(17,42,64,0.93);
-      border-radius: 0 0 10px 10px;
+      margin: 16px 0 10px 0;
     }
     #placement-controls label { color: #3fffd7; font-weight: bold; }
     #placement-controls select.halo-select { min-width: 160px; }
@@ -1025,18 +989,12 @@ pointer-events: none;
   <div id="messages" role="status" aria-live="polite"></div>
     <!-- === SHIP PLACEMENT CONTROLS === -->
     <div id="main-controls" style="display: none; flex-direction: column; align-items: center; width: 100%;">
-      <div id="placement-panel" class="expanded">
-        <div id="placement-tab" onclick="togglePlacementPanel()">
-          <span>Placement</span>
-          <span id="placement-arrow">&#9660;</span>
-        </div>
-        <div id="placement-controls">
-          <label>Ship:
-            <select id="ship-select" class="halo-select"></select>
-          </label>
-          <button id="toggle-orientation" class="halo-btn" aria-label="Toggle ship orientation">Horizontal ↔</button>
-          <span id="placement-hint"></span>
-        </div>
+      <div id="placement-controls">
+        <label>Ship:
+          <select id="ship-select" class="halo-select"></select>
+        </label>
+        <button id="toggle-orientation" class="halo-btn" aria-label="Toggle ship orientation">Horizontal ↔</button>
+        <span id="placement-hint"></span>
       </div>
     </div>
 <!-- ======================
@@ -2076,11 +2034,6 @@ function toggleLogPanel() {
   panel.classList.toggle('collapsed');
 }
 
-function togglePlacementPanel() {
-  const panel = document.getElementById('placement-panel');
-  panel.classList.toggle('expanded');
-  panel.classList.toggle('collapsed');
-}
 
 function toggleMenuPanel(id) {
   const panel = document.getElementById(id);
