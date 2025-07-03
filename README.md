@@ -272,8 +272,35 @@
       margin: 16px 0 10px 0;
     }
     #placement-controls label { color: #3fffd7; font-weight: bold; }
-    #placement-controls select.halo-select { min-width: 160px; }
-    #placement-controls button.halo-btn { min-width: 130px; }
+    #placement-controls select.placement-select {
+      min-width: 160px;
+      font-size: 1.05rem;
+      padding: 6px 10px;
+      color: #e9fcff;
+      background: rgba(30,45,64,0.9);
+      border: 1px solid #1fffd7aa;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #placement-controls button.placement-btn {
+      min-width: 130px;
+      font-size: 1.05rem;
+      padding: 6px 12px;
+      color: #e9fcff;
+      background: rgba(30,45,64,0.9);
+      border: 1px solid #1fffd7aa;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    #placement-controls select.placement-select:hover,
+    #placement-controls button.placement-btn:hover {
+      background: rgba(40,60,85,0.95);
+    }
+    #placement-controls button.placement-btn:active {
+      transform: scale(0.95);
+    }
     #confirm-salvo { display: none; }
 
     /* -- Main Menu Dropdown Panels -- */
@@ -991,9 +1018,9 @@ pointer-events: none;
     <div id="main-controls" style="display: none; flex-direction: column; align-items: center; width: 100%;">
       <div id="placement-controls">
         <label>Ship:
-          <select id="ship-select" class="halo-select"></select>
+          <select id="ship-select" class="placement-select"></select>
         </label>
-        <button id="toggle-orientation" class="halo-btn" aria-label="Toggle ship orientation">Horizontal ↔</button>
+        <button id="toggle-orientation" class="placement-btn" aria-label="Toggle ship orientation">Horizontal ↔</button>
         <span id="placement-hint"></span>
       </div>
     </div>
