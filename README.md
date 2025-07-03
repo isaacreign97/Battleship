@@ -107,7 +107,7 @@
       pointer-events: none;
       transition: transform 0.2s;
     }
-    .ship .cell-icon { font-size: 1.1rem; }
+  .ship .cell-icon { font-size: 1.1rem; }
     /* === BOARD LABELS === */
     .cell.label-cell { background: #112233; font-weight: bold; color: #3fffd7; }
     .cell.corner-cell { background: #19283e; }
@@ -812,6 +812,15 @@ pointer-events: none;
   .halo-menu-box { min-width: 0; width: 98vw; padding: 7vw 3vw; }
   .halo-title { font-size: 2.1rem; }
   .halo-menu-options { width: 96vw; }
+}
+
+/* === RESPONSIVE BOARD LAYOUT === */
+@media (max-width: 768px) and (orientation: portrait) {
+  .grids-wrapper { flex-direction: column; align-items: center; }
+  .grid { width: 94vw; height: 94vw; max-width: 360px; max-height: 360px; }
+}
+@media (max-width: 900px) and (orientation: landscape) {
+  .grid { width: 45vw; height: 45vw; max-width: 360px; max-height: 360px; }
 }
 
 
