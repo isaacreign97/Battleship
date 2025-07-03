@@ -346,6 +346,31 @@
       justify-content: center;
       align-items: center;
     }
+    .menu-select {
+      min-width: 170px;
+      font-size: 1.05rem;
+      padding: 8px 12px;
+      color: #e9fcff;
+      background: rgba(30,45,64,0.9);
+      border: 1px solid #1fffd7aa;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+      padding-right: 28px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23e9fcff' d='M0 0L5 6L10 0Z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+    .menu-select:hover,
+    .menu-select:focus {
+      background: rgba(40,60,85,0.95);
+      outline: none;
+    }
+    .menu-select:active {
+      transform: scale(0.97);
+    }
     .grid-title {
   color: #00ffff;
   font-size: 1.5rem;
@@ -797,46 +822,6 @@ pointer-events: none;
     flex-wrap: wrap; justify-content: center;
   }
 .halo-menu-options + .halo-menu-options { margin-top: 6px; }
-.halo-select {
-  min-width: 180px;
-  font-size: 1.05rem;
-  color: #e9fcff;
-  background: rgba(70,113,188,0.10);
-  border: 2px solid #3ec3ff33;
-  padding: 11px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  box-shadow: 0 2.5px 10px #18e5f911;
-  transition: box-shadow 0.18s, background 0.16s, border 0.19s, color 0.18s, transform 0.12s;
-  appearance: none;
-  -webkit-appearance: none;
-  padding-right: 34px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23e9fcff' d='M0 0L5 6L10 0Z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-}
-.halo-select:hover, .halo-select:focus {
-  color: #57c1ff;
-  background: rgba(56,127,255,0.17);
-  border-color: #51f6ff;
-  box-shadow: 0 5px 34px #2ad8ff44, 0 2px 18px #27c7f1bb;
-  transform: scale(1.048) translateY(-2px);
-  animation: bounceUpDown 0.6s infinite;
-  outline: none;
-}
-.halo-select:active {
-  transform: scale(0.98);
-  animation: clickDownUp 0.3s;
-}
-.halo-select.open {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23e9fcff' d='M0 6L5 0L10 6Z'/%3E%3C/svg%3E");
-  animation: dropdownOpen 0.3s;
-}
-@keyframes dropdownOpen {
-  0% { transform: scale(0.96); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
 .halo-btn {
     min-width: 92px;
     font-size: 1.09rem;
@@ -948,7 +933,7 @@ pointer-events: none;
         <span class="menu-arrow">&#9660;</span>
       </div>
       <div class="menu-content">
-        <select id="mode-select" class="halo-select" aria-label="Game mode">
+        <select id="mode-select" class="menu-select" aria-label="Game mode">
           <option value="classic" selected>Classic</option>
           <option value="salvo">Salvo</option>
         </select>
@@ -960,7 +945,7 @@ pointer-events: none;
         <span class="menu-arrow">&#9660;</span>
       </div>
       <div class="menu-content">
-        <select id="diff-select" class="halo-select" aria-label="AI difficulty">
+        <select id="diff-select" class="menu-select" aria-label="AI difficulty">
           <option value="easy" selected>Easy</option>
           <option value="medium">Medium</option>
           <option value="hard">Hard</option>
@@ -975,7 +960,7 @@ pointer-events: none;
         <span class="menu-arrow">&#9660;</span>
       </div>
       <div class="menu-content">
-        <select id="theme-select" class="halo-select" aria-label="Theme">
+        <select id="theme-select" class="menu-select" aria-label="Theme">
           <option value="navy" selected>Navy</option>
           <option value="scifi">Sci-Fi</option>
           <option value="pirate">Pirate</option>
@@ -2021,10 +2006,6 @@ function restartGame() {
     applyTheme(selectedTheme);
   };
 
-  document.querySelectorAll('.halo-select').forEach(sel => {
-    sel.addEventListener('mousedown', () => sel.classList.add('open'));
-    sel.addEventListener('blur', () => sel.classList.remove('open'));
-  });
 
   function applyTheme(theme) {
     document.body.classList.remove('theme-navy','theme-scifi','theme-pirate');
