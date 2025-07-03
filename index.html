@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Battleship</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #1e3c72, #2a5298);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+    }
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      backdrop-filter: blur(8px);
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+    .boards {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(10, 30px);
+      grid-template-rows: repeat(10, 30px);
+      gap: 2px;
+      user-select: none;
+    }
+    .cell {
+      width: 30px;
+      height: 30px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    .cell.hit {
+      background: rgba(255, 0, 0, 0.7);
+    }
+    .cell.miss {
+      background: rgba(0, 123, 255, 0.7);
+    }
+    .cell.ship {
+      background: rgba(0, 255, 0, 0.4);
+    }
+    .controls {
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .status {
+      margin-bottom: 10px;
+    }
+    @media (max-width: 600px) {
+      .boards {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const SHIPS = [
+      { name: 'Carrier', size: 5 },
+      { name: 'Battleship', size: 4 },
+      { name: 'Cruiser', size: 3 },
+      { name: 'Submarine', size: 3 },
+      { name: 'Destroyer', size: 2 },
+    ];
+
+    const createBoard = () => Array(10).fill(0).map(() => Array(10).fill({ ship: null, hit: false, miss: false }));
+
+    function cloneBoard(board) {
+      return board.map(row => row.map(cell => ({ ...cell })));
+    }
+
+    function placeShip(board, ship, x, y, horizontal) {
+      for (let i = 0; i < ship.size; i++) {
+        const nx = horizontal ? x + i : x;
+        const ny = horizontal ? y : y + i;
+        if (nx >= 10 || ny >= 10 || board[ny][nx].ship) return false;
+      }
+      for (let i = 0; i < ship.size; i++) {
+        const nx = horizontal ? x + i : x;
+        const ny = horizontal ? y : y + i;
+        board[ny][nx].ship = ship.name;
+      }
+      return true;
+    }
+
+    function randomPlacement() {
+      const board = createBoard();
+      for (let ship of SHIPS) {
+        let placed = false;
+        while (!placed) {
+          const horizontal = Math.random() < 0.5;
+          const x = Math.floor(Math.random() * 10);
+          const y = Math.floor(Math.random() * 10);
+          placed = placeShip(board, ship, x, y, horizontal);
+        }
+      }
+      return board;
+    }
+
+    function Game() {
+      const [playerBoard, setPlayerBoard] = useState(createBoard());
+      const [aiBoard, setAiBoard] = useState(randomPlacement());
+      const [placingIndex, setPlacingIndex] = useState(0);
+      const [horizontal, setHorizontal] = useState(true);
+      const [playerTurn, setPlayerTurn] = useState(false);
+      const [aiTargets, setAiTargets] = useState([]);
+      const [status, setStatus] = useState('Place your ships');
+
+      useEffect(() => {
+        if (placingIndex >= SHIPS.length) {
+          setStatus('Your turn');
+          setPlayerTurn(true);
+        }
+      }, [placingIndex]);
+
+      const resetGame = () => {
+        setPlayerBoard(createBoard());
+        setAiBoard(randomPlacement());
+        setPlacingIndex(0);
+        setHorizontal(true);
+        setPlayerTurn(false);
+        setAiTargets([]);
+        setStatus('Place your ships');
+      };
+
+      const handlePlace = (x, y) => {
+        if (placingIndex >= SHIPS.length) return;
+        const board = cloneBoard(playerBoard);
+        const ship = SHIPS[placingIndex];
+        if (placeShip(board, ship, x, y, horizontal)) {
+          setPlayerBoard(board);
+          setPlacingIndex(placingIndex + 1);
+        }
+      };
+
+      const handleAttack = (x, y) => {
+        if (!playerTurn) return;
+        const board = cloneBoard(aiBoard);
+        const cell = board[y][x];
+        if (cell.hit || cell.miss) return;
+        if (cell.ship) {
+          cell.hit = true;
+        } else {
+          cell.miss = true;
+        }
+        setAiBoard(board);
+        setPlayerTurn(false);
+        setStatus('AI thinking...');
+      };
+
+      useEffect(() => {
+        if (!playerTurn && placingIndex >= SHIPS.length) {
+          const timer = setTimeout(() => aiMove(), 500);
+          return () => clearTimeout(timer);
+        }
+      }, [playerTurn, aiTargets, placingIndex]);
+
+      const aiMove = () => {
+        const board = cloneBoard(playerBoard);
+        let tx, ty;
+        while (true) {
+          if (aiTargets.length) {
+            const [cx, cy] = aiTargets.pop();
+            if (cx >= 0 && cx < 10 && cy >= 0 && cy < 10 && !board[cy][cx].hit && !board[cy][cx].miss) {
+              tx = cx; ty = cy; break;
+            }
+          } else {
+            tx = Math.floor(Math.random() * 10);
+            ty = Math.floor(Math.random() * 10);
+            if (!board[ty][tx].hit && !board[ty][tx].miss) break;
+          }
+        }
+        const cell = board[ty][tx];
+        if (cell.ship) {
+          cell.hit = true;
+          setAiTargets(prev => [...prev, [tx+1, ty], [tx-1, ty], [tx, ty+1], [tx, ty-1]]);
+        } else {
+          cell.miss = true;
+        }
+        setPlayerBoard(board);
+        setPlayerTurn(true);
+        setStatus('Your turn');
+      };
+
+      const checkVictory = board => {
+        for (let row of board) {
+          for (let cell of row) {
+            if (cell.ship && !cell.hit) return false;
+          }
+        }
+        return true;
+      };
+
+      useEffect(() => {
+        if (placingIndex < SHIPS.length) return;
+        if (checkVictory(aiBoard)) {
+          setStatus('You win!');
+          setPlayerTurn(false);
+        } else if (checkVictory(playerBoard)) {
+          setStatus('AI wins!');
+          setPlayerTurn(false);
+        }
+      }, [playerBoard, aiBoard, placingIndex]);
+
+      const renderBoard = (board, isPlayer) => {
+        return (
+          <div className="board">
+            {board.map((row, y) =>
+              row.map((cell, x) => {
+                let className = 'cell';
+                if (cell.hit) className += ' hit';
+                else if (cell.miss) className += ' miss';
+                else if (isPlayer && cell.ship) className += ' ship';
+                return (
+                  <div
+                    key={x + ',' + y}
+                    className={className}
+                    onClick={() => {
+                      if (placingIndex < SHIPS.length && isPlayer) handlePlace(x, y);
+                      else if (!isPlayer) handleAttack(x, y);
+                    }}
+                  />
+                );
+              })
+            )}
+          </div>
+        );
+      };
+
+      return (
+        <div className="game-container">
+          <h1>Battleship</h1>
+          <div className="status">{status}</div>
+          {placingIndex < SHIPS.length && (
+            <div className="controls">
+              <button onClick={() => setHorizontal(!horizontal)}>
+                Orientation: {horizontal ? 'Horizontal' : 'Vertical'}
+              </button>
+            </div>
+          )}
+          <div className="boards">
+            {renderBoard(playerBoard, true)}
+            {renderBoard(aiBoard, false)}
+          </div>
+          <button onClick={resetGame}>Reset Game</button>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<Game />, document.getElementById('root'));
+  </script>
+</body>
+</html>
