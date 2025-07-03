@@ -816,7 +816,7 @@ pointer-events: none;
 
 /* === RESPONSIVE BOARD LAYOUT === */
 @media (orientation: portrait) {
-  .grids-wrapper { flex-direction: column; align-items: center; }
+  .grids-row { flex-direction: column; align-items: center; }
   .grid { width: 90vmin; height: 90vmin; max-width: 360px; max-height: 360px; }
 }
 @media (orientation: landscape) and (max-width: 900px) {
