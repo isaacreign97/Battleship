@@ -324,6 +324,52 @@ position: relative;   /* This is important for z-index to work! */
   box-shadow: 0 2px 10px #21fff633;
   font-size: 0.95rem;
 }
+#combat-panel {
+  width: 100%;
+  padding: 6px 10px;
+  background: rgba(20,38,55,0.85);
+  border: 1px solid #00ffeebb;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px #21fff633;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+#combat-panel .combat-metrics {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+#combat-panel .combat-metrics span {
+  font-weight: 600;
+}
+#fleet-bar {
+  width: 100%;
+  height: 10px;
+  background: rgba(50,80,80,0.45);
+  border-radius: 6px;
+  overflow: hidden;
+}
+#fleet-bar-inner {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg,#00ff88,#00e0a0);
+  transition: width 0.3s;
+}
+#fleet-bar-inner.damaged {
+  background: linear-gradient(90deg,#ffd447,#ffbb33);
+}
+#fleet-bar-inner.critical {
+  background: linear-gradient(90deg,#ff6b6b,#ff1c1c);
+}
+#fleet-percentage {
+  text-align: center;
+  font-weight: 600;
+  margin-top: 4px;
+}
+#fleet-percentage.green { color: #00ff88; }
+#fleet-percentage.yellow { color: #ffd447; }
+#fleet-percentage.red { color: #ff6b6b; }
 #alert-status.green { color: #00ff88; }
 #alert-status.yellow { color: #ffd447; }
 #alert-status.red { color: #ff6b6b; }
@@ -849,6 +895,15 @@ pointer-events: none;
     <span id="turn-count">Turn 0</span>
     <span id="accuracy">Accuracy: 0%</span>
     <span id="combat-readiness">Status: OPTIMAL</span>
+  </div>
+  <div id="combat-panel">
+    <div class="combat-metrics">
+      <span id="stat-hits">Hits: 0</span>
+      <span id="stat-misses">Misses: 0</span>
+      <span id="stat-accuracy">Accuracy: 0%</span>
+    </div>
+    <div id="fleet-bar"><div id="fleet-bar-inner"></div></div>
+    <div id="fleet-percentage" class="green">Fleet Integrity: 100%</div>
   </div>
   <h3 id="turn-indicator"></h3>
   <div id="messages" role="status" aria-live="polite"></div>
@@ -1933,6 +1988,13 @@ function updateHUD() {
     document.getElementById("hud-misses").textContent = `💦 ${misses}`;
     const total = hits + misses;
     if(accuracyElem) accuracyElem.textContent = `Accuracy: ${total ? Math.round((hits/total)*100) : 0}%`;
+    const acc = total ? Math.round((hits/total)*100) : 0;
+    const statHits = document.getElementById('stat-hits');
+    const statMisses = document.getElementById('stat-misses');
+    const statAcc = document.getElementById('stat-accuracy');
+    if(statHits) statHits.textContent = `Hits: ${hits}`;
+    if(statMisses) statMisses.textContent = `Misses: ${misses}`;
+    if(statAcc) statAcc.textContent = `Accuracy: ${acc}%`;
     if(turnCountElem) turnCountElem.textContent = `Turn ${turnNumber}`;
     if(alertStatusElem){
       const remain = playerShips.length;
@@ -1944,6 +2006,26 @@ function updateHUD() {
       const remain = playerShips.length;
       let r = remain === 5 ? 'OPTIMAL' : remain >= 3 ? 'ADEQUATE' : remain >= 1 ? 'CRITICAL' : 'DESTROYED';
       readinessElem.textContent = `Status: ${r}`;
+    }
+    const fleetBar = document.getElementById('fleet-bar-inner');
+    const fleetPct = document.getElementById('fleet-percentage');
+    if(fleetBar && fleetPct){
+      const totalShips = SHIPS.length;
+      const remain = playerShips.length;
+      const pct = Math.round((remain/totalShips)*100);
+      fleetBar.style.width = pct + '%';
+      fleetBar.classList.remove('damaged','critical');
+      fleetPct.classList.remove('green','yellow','red');
+      fleetPct.textContent = `Fleet Integrity: ${pct}%`;
+      if(pct <= 30){
+        fleetBar.classList.add('critical');
+        fleetPct.classList.add('red');
+      } else if(pct <= 60){
+        fleetBar.classList.add('damaged');
+        fleetPct.classList.add('yellow');
+      } else {
+        fleetPct.classList.add('green');
+      }
     }
     const pwrap = document.getElementById('powerups');
     if(pwrap){
