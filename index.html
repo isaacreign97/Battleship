@@ -8,6 +8,9 @@
     :root {
       --ally: #00e0ff;
       --enemy: #ff3366;
+      --alert-green: #00ff88;
+      --alert-yellow: #ffc400;
+      --alert-red: #ff3366;
     }
 
     body {
@@ -63,6 +66,107 @@
       -webkit-background-clip: text;
       color: transparent;
       margin-bottom: 10px;
+    }
+
+    .command-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 5px 10px;
+      font-family: monospace;
+      background: rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      margin-bottom: 10px;
+    }
+    .command-bar .alert-green { color: var(--alert-green); }
+    .command-bar .alert-yellow { color: var(--alert-yellow); }
+    .command-bar .alert-red { color: var(--alert-red); }
+
+    .radar {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 2px solid var(--ally);
+      overflow: hidden;
+      background: rgba(0,0,0,0.3);
+    }
+    .radar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0,224,255,0.2), transparent 70%);
+    }
+    .radar .beam {
+      position: absolute;
+      width: 50%;
+      height: 2px;
+      top: 50%;
+      left: 50%;
+      background: var(--ally);
+      transform-origin: 0 0;
+      animation: sweep 2s linear infinite;
+    }
+    @keyframes sweep {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .stats-panel {
+      margin-top: 10px;
+      width: 100%;
+      font-family: monospace;
+      background: rgba(0,0,0,0.4);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .health-bar {
+      background: rgba(255,255,255,0.1);
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+    .health {
+      background: var(--ally);
+      height: 100%;
+      width: 100%;
+      transition: width 0.3s;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .modal-content {
+      background: rgba(0,0,0,0.8);
+      padding: 20px 30px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .enemy-board.targeting .cell:hover {
+      box-shadow: 0 0 6px #fff, 0 0 20px var(--enemy);
+      position: relative;
+    }
+    .enemy-board.targeting .cell:hover::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 1px dashed #fff;
+      border-radius: 4px;
+      animation: ping 1s infinite;
+    }
+    @keyframes ping {
+      0% { opacity: 1; }
+      50% { opacity: 0; }
+      100% { opacity: 1; }
     }
     .game-container {
       position: relative;
@@ -218,6 +322,20 @@
       const [aiTargets, setAiTargets] = useState([]);
       const [status, setStatus] = useState('Deploy your fleet');
 
+      const [turn, setTurn] = useState(1);
+      const [playerShots, setPlayerShots] = useState(0);
+      const [playerHits, setPlayerHits] = useState(0);
+      const [playerMisses, setPlayerMisses] = useState(0);
+      const [aiHits, setAiHits] = useState(0);
+      const [clock, setClock] = useState(new Date());
+      const [result, setResult] = useState(null);
+      const totalShipCells = SHIPS.reduce((a,s) => a + s.size, 0);
+
+      useEffect(() => {
+        const t = setInterval(() => setClock(new Date()), 1000);
+        return () => clearInterval(t);
+      }, []);
+
       useEffect(() => {
         if (placingIndex >= SHIPS.length) {
           setStatus('Awaiting your command');
@@ -233,6 +351,12 @@
         setPlayerTurn(false);
         setAiTargets([]);
         setStatus('Deploy your fleet');
+        setTurn(1);
+        setPlayerShots(0);
+        setPlayerHits(0);
+        setPlayerMisses(0);
+        setAiHits(0);
+        setResult(null);
       };
 
       const handlePlace = (x, y) => {
@@ -252,9 +376,12 @@
         if (cell.hit || cell.miss) return;
         if (cell.ship) {
           cell.hit = true;
+          setPlayerHits(h => h + 1);
         } else {
           cell.miss = true;
+          setPlayerMisses(m => m + 1);
         }
+        setPlayerShots(s => s + 1);
         setAiBoard(board);
         setPlayerTurn(false);
         setStatus('Enemy targeting...');
@@ -285,12 +412,14 @@
         const cell = board[ty][tx];
         if (cell.ship) {
           cell.hit = true;
+          setAiHits(h => h + 1);
           setAiTargets(prev => [...prev, [tx+1, ty], [tx-1, ty], [tx, ty+1], [tx, ty-1]]);
         } else {
           cell.miss = true;
         }
         setPlayerBoard(board);
         setPlayerTurn(true);
+        setTurn(t => t + 1);
         setStatus('Awaiting your command');
       };
 
@@ -307,16 +436,19 @@
         if (placingIndex < SHIPS.length) return;
         if (checkVictory(aiBoard)) {
           setStatus('Victory!');
+          setResult('Victory');
           setPlayerTurn(false);
         } else if (checkVictory(playerBoard)) {
           setStatus('Defeat...');
+          setResult('Defeat');
           setPlayerTurn(false);
         }
       }, [playerBoard, aiBoard, placingIndex]);
 
       const renderBoard = (board, isPlayer) => {
+        const boardClass = isPlayer ? 'board player-board' : `board enemy-board${playerTurn && !isPlayer && placingIndex >= SHIPS.length ? ' targeting' : ''}`;
         return (
-          <div className="board">
+          <div className={boardClass}>
             {board.map((row, y) =>
               row.map((cell, x) => {
                 let className = 'cell';
@@ -342,8 +474,21 @@
         );
       };
 
+      const accuracy = playerShots ? Math.round((playerHits / playerShots) * 100) : 0;
+      const damageRatio = aiHits / totalShipCells;
+      let alertClass = 'alert-green';
+      if (damageRatio > 0.5) alertClass = 'alert-red';
+      else if (damageRatio > 0.2) alertClass = 'alert-yellow';
+      const clockStr = clock.toLocaleTimeString('en-GB');
+
       return (
         <div className="game-container">
+          <div className="command-bar">
+            <span>{clockStr}</span>
+            <span className={alertClass}>ALERT</span>
+            <span>Turn {turn}</span>
+            <span>Accuracy {accuracy}%</span>
+          </div>
           <h1>Battleship</h1>
           <div className="status">{status}</div>
           {placingIndex < SHIPS.length && (
@@ -356,8 +501,22 @@
           <div className="boards">
             {renderBoard(playerBoard, true)}
             {renderBoard(aiBoard, false)}
+            <div className="radar"><div className="beam"></div></div>
+          </div>
+          <div className="stats-panel">
+            <div>Hits: {playerHits} | Misses: {playerMisses}</div>
+            <div className="health-bar"><div className="health" style={{width: `${Math.round((1 - damageRatio) * 100)}%`}}></div></div>
           </div>
           <button onClick={resetGame}>Reset Game</button>
+          {result && (
+            <div className="modal">
+              <div className="modal-content">
+                <h2>{result}</h2>
+                <p>Final Accuracy: {accuracy}%</p>
+                <button onClick={resetGame}>Play Again</button>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
