@@ -302,50 +302,6 @@
       transform: scale(0.95);
     }
     #confirm-salvo { display: none; }
-
-    /* -- Main Menu Dropdown Panels -- */
-    .menu-panel {
-      min-width: 210px;
-      max-width: 380px;
-      font-size: 0.97rem;
-      background: rgba(20,38,55,0.92);
-      border-radius: 12px;
-      box-shadow: 0 2px 12px #21fff655;
-      border: 1.5px solid #00ffeebb;
-      margin: 16px 0 10px;
-      transition: max-height 0.3s cubic-bezier(0.4, 0.2, 0.3, 1), box-shadow 0.2s;
-      overflow: hidden;
-      max-height: 52px;
-      cursor: pointer;
-    }
-    .menu-panel.expanded { max-height: 170px; box-shadow: 0 4px 18px #00fff644; }
-    .menu-tab {
-      background: #1a3e4a;
-      color: #3fffd7;
-      font-size: 1.06rem;
-      font-weight: 600;
-      text-align: center;
-      padding: 7px 0 6px 0;
-      border-radius: 10px 10px 0 0;
-      border-bottom: 1.5px solid #1fffd7aa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      transition: background 0.2s, transform 0.15s;
-    }
-    .menu-tab:hover { background: #215b68; animation: bounceUpDown 0.6s infinite; }
-    .menu-tab:active { animation: clickDownUp 0.3s; }
-    .menu-arrow { font-size: 1.2em; transition: transform 0.2s; }
-    .menu-panel.expanded .menu-arrow { transform: rotate(180deg); }
-    .menu-content {
-      padding: 12px 16px;
-      background: rgba(17,42,64,0.93);
-      border-radius: 0 0 10px 10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
     .menu-select {
       min-width: 170px;
       font-size: 1.05rem;
@@ -359,7 +315,7 @@
       appearance: none;
       -webkit-appearance: none;
       padding-right: 28px;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23e9fcff' d='M0 0L5 6L10 0Z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 5'%3E%3Cpath fill='%23e9fcff' d='M0 0L4 5L8 0Z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 10px center;
     }
@@ -927,45 +883,30 @@ pointer-events: none;
       <span>BATTLESHIP<br>ULTRA</span>
       <div class="halo-shine"></div>
     </div>
-    <div id="mode-panel" class="menu-panel collapsed">
-      <div class="menu-tab" onclick="toggleMenuPanel('mode-panel')">
-        <span>Game Mode</span>
-        <span class="menu-arrow">&#9660;</span>
-      </div>
-      <div class="menu-content">
-        <select id="mode-select" class="menu-select" aria-label="Game mode">
-          <option value="classic" selected>Classic</option>
-          <option value="salvo">Salvo</option>
-        </select>
-      </div>
+    <div class="halo-menu-options">
+      <label for="mode-select">Game Mode</label>
+      <select id="mode-select" class="menu-select" aria-label="Game mode">
+        <option value="classic" selected>Classic</option>
+        <option value="salvo">Salvo</option>
+      </select>
     </div>
-    <div id="diff-panel" class="menu-panel collapsed" style="margin-top:18px;">
-      <div class="menu-tab" onclick="toggleMenuPanel('diff-panel')">
-        <span>AI Difficulty</span>
-        <span class="menu-arrow">&#9660;</span>
-      </div>
-      <div class="menu-content">
-        <select id="diff-select" class="menu-select" aria-label="AI difficulty">
-          <option value="easy" selected>Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
-          <option value="advanced">Advanced</option>
-          <option value="god">God</option>
-        </select>
-      </div>
+    <div class="halo-menu-options" style="margin-top:18px;">
+      <label for="diff-select">AI Difficulty</label>
+      <select id="diff-select" class="menu-select" aria-label="AI difficulty">
+        <option value="easy" selected>Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+        <option value="advanced">Advanced</option>
+        <option value="god">God</option>
+      </select>
     </div>
-    <div id="theme-panel" class="menu-panel collapsed" style="margin-top:18px;">
-      <div class="menu-tab" onclick="toggleMenuPanel('theme-panel')">
-        <span>Theme</span>
-        <span class="menu-arrow">&#9660;</span>
-      </div>
-      <div class="menu-content">
-        <select id="theme-select" class="menu-select" aria-label="Theme">
-          <option value="navy" selected>Navy</option>
-          <option value="scifi">Sci-Fi</option>
-          <option value="pirate">Pirate</option>
-        </select>
-      </div>
+    <div class="halo-menu-options" style="margin-top:18px;">
+      <label for="theme-select">Theme</label>
+      <select id="theme-select" class="menu-select" aria-label="Theme">
+        <option value="navy" selected>Navy</option>
+        <option value="scifi">Sci-Fi</option>
+        <option value="pirate">Pirate</option>
+      </select>
     </div>
     <div style="margin:30px 0 8px 0;">
       <button class="halo-btn halo-btn-big" id="menu-start" aria-label="Start game">Start Game</button>
@@ -2043,11 +1984,6 @@ function toggleLogPanel() {
 }
 
 
-function toggleMenuPanel(id) {
-  const panel = document.getElementById(id);
-  panel.classList.toggle('expanded');
-  panel.classList.toggle('collapsed');
-}
 
 function grantPowerup(){
   const type = powerTypes[nextPowerupIndex];
