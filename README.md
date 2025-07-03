@@ -311,6 +311,23 @@ position: relative;   /* This is important for z-index to work! */
   margin-bottom: 2px;
 }
 
+#command-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 4px 10px;
+  background: rgba(20,38,55,0.85);
+  border: 1px solid #00ffeebb;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px #21fff633;
+  font-size: 0.95rem;
+}
+#alert-status.green { color: #00ff88; }
+#alert-status.yellow { color: #ffd447; }
+#alert-status.red { color: #ff6b6b; }
+
 #hud-last-move {
   color: #b9f6ff;
   font-size: 0.96rem;
@@ -826,6 +843,13 @@ pointer-events: none;
       ========================= -->
   <div id="game-container" style="display: flex;">
 <h1 class="title-text">Battleship Ultra</h1>
+  <div id="command-bar">
+    <span id="navcom-clock"></span>
+    <span id="alert-status" class="green">ALERT: GREEN</span>
+    <span id="turn-count">Turn 0</span>
+    <span id="accuracy">Accuracy: 0%</span>
+    <span id="combat-readiness">Status: OPTIMAL</span>
+  </div>
   <h3 id="turn-indicator"></h3>
   <div id="messages" role="status" aria-live="polite"></div>
     <!-- === SHIP PLACEMENT CONTROLS === -->
@@ -933,6 +957,7 @@ window.selectedTheme = theme;
   let earnedPowerups = [];
   let activePowerup = null;
   let hitsForPower = 3;
+  let turnNumber = 0;
   const powerTypes = ['cluster','sonar'];
   let nextPowerupIndex = 0;
 const AI_PROB = {easy:0, medium:0.3, hard:0.5, advanced:0.8, god:0.9};
@@ -946,6 +971,11 @@ const hitSound = document.getElementById('hit-sound');
 const muteBtn = document.getElementById('toggle-mute');
 const musicSlider = document.getElementById('music-volume');
 const sfxSlider = document.getElementById('sfx-volume');
+const navcomClock = document.getElementById('navcom-clock');
+const alertStatusElem = document.getElementById('alert-status');
+const turnCountElem = document.getElementById('turn-count');
+const accuracyElem = document.getElementById('accuracy');
+const readinessElem = document.getElementById('combat-readiness');
 let audioMuted = localStorage.getItem('bs-muted') === 'true';
 if(musicSlider){
   const mv = localStorage.getItem('bs-music-vol');
@@ -961,6 +991,13 @@ confirmSalvoBtn.onclick = () => {
   confirmSalvoBtn.style.display = 'none';
   applyPlayerSalvoShots();
 };
+
+function updateClock(){
+  const now = new Date();
+  if(navcomClock) navcomClock.textContent = now.toLocaleTimeString('en-GB', {hour12:false});
+}
+setInterval(updateClock,1000);
+updateClock();
 
 // --- Audio Control Handlers ---
 function updateMuteIcon() {
@@ -1658,6 +1695,7 @@ function restartGame() {
   activePowerup = null;
   hitsForPower = 3;
   nextPowerupIndex = 0;
+  turnNumber = 0;
   // Set up boards
   playerBoard = createBoard();
   enemyBoard = createBoard();
@@ -1678,6 +1716,10 @@ function restartGame() {
 }
   function setTurnIndicator(msg) {
     document.getElementById('turn-indicator').textContent = msg || '';
+    if(msg === 'Your Turn') {
+      turnNumber++;
+    }
+    updateHUD();
   }
 
   /* ==============================
@@ -1885,8 +1927,24 @@ function updateHUD() {
   // Example for illustration:
     document.getElementById("hud-player-ships").textContent = `🚢 ${playerShips.length}`;
     document.getElementById("hud-enemy-ships").textContent = `🛳 ${aiShips.length}`;
-    document.getElementById("hud-hits").textContent = `🔥 ${countPlayerHits()}`;
-    document.getElementById("hud-misses").textContent = `💦 ${countPlayerMisses()}`;
+    const hits = countPlayerHits();
+    const misses = countPlayerMisses();
+    document.getElementById("hud-hits").textContent = `🔥 ${hits}`;
+    document.getElementById("hud-misses").textContent = `💦 ${misses}`;
+    const total = hits + misses;
+    if(accuracyElem) accuracyElem.textContent = `Accuracy: ${total ? Math.round((hits/total)*100) : 0}%`;
+    if(turnCountElem) turnCountElem.textContent = `Turn ${turnNumber}`;
+    if(alertStatusElem){
+      const remain = playerShips.length;
+      let status = remain >= 4 ? 'GREEN' : remain >= 2 ? 'YELLOW' : 'RED';
+      alertStatusElem.textContent = `ALERT: ${status}`;
+      alertStatusElem.className = status.toLowerCase();
+    }
+    if(readinessElem){
+      const remain = playerShips.length;
+      let r = remain === 5 ? 'OPTIMAL' : remain >= 3 ? 'ADEQUATE' : remain >= 1 ? 'CRITICAL' : 'DESTROYED';
+      readinessElem.textContent = `Status: ${r}`;
+    }
     const pwrap = document.getElementById('powerups');
     if(pwrap){
       pwrap.innerHTML = '';
