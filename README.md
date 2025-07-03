@@ -241,15 +241,6 @@
       animation: scanFade 0.8s forwards;
     }
     @keyframes scanFade { from {opacity:1;} to {opacity:0;} }
-    /* === RESPONSIVE BOARD LAYOUT === */
-    @media (orientation: portrait) {
-      .grids-wrapper { flex-direction: column; align-items: center; }
-      .board-grid { margin: 0 auto; }
-      .grid { width: 94vmin; height: 94vmin; max-width: 360px; max-height: 360px; }
-    }
-    @media (orientation: landscape) {
-      .grids-wrapper { flex-direction: row; justify-content: center; align-items: flex-start; }
-    }
     /* === MODALS/MENU OVERLAYS === */
     .menu-modal-show { display: flex !important; }
     .menu-modal, #main-menu { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f1b2bdc; z-index: 2000;}
@@ -451,14 +442,6 @@ position: relative;   /* This is important for z-index to work! */
   transition: opacity 0.3s;
 }
 
-@media (max-width: 600px) {
-  #audio-controls { transform: scale(0.85); bottom: 6px; left: 6px; }
-  #audio-controls input[type=range] { width: 50px; }
-}
-@media (min-width: 1200px) {
-  #audio-controls { transform: scale(1.1); }
-  #audio-controls input[type=range] { width: 70px; }
-}
 
 /* --- Pull Down Action Log Styles --- */
 #action-log-panel {
@@ -598,15 +581,6 @@ z-index: 10;
 }
 
 
-/* Responsive: Stacks on small screens */
-@media (max-width: 900px) {
-  #game-container { padding: 12px 0; max-width: 99vw; }
-  .hud-log-row, .control-panel { flex-direction: column; align-items: center; }
-}
-@media (max-width: 900px) and (orientation: portrait) {
-  .grid-label, .board-grid { width: 98vw !important; margin: 0 !important; }
-  .grid { width: 95vw; height: 95vw; max-width: 340px; max-height: 340px; }
-}
 
   #starfield {
     position: fixed; left:0; top:0; width:100vw; height:100vh;
@@ -838,11 +812,6 @@ pointer-events: none;
   .halo-menu-box { min-width: 0; width: 98vw; padding: 7vw 3vw; }
   .halo-title { font-size: 2.1rem; }
   .halo-menu-options { width: 96vw; }
-}
-@media (max-width: 480px) {
-  .grid { width: 94vw; height: 94vw; }
-  .halo-menu-box { width: 95vw; padding: 8vw 4vw; }
-  body { font-size: 14px; }
 }
 
 
