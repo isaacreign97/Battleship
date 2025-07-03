@@ -311,6 +311,50 @@
     #placement-controls select.halo-select { min-width: 160px; }
     #placement-controls button.halo-btn { min-width: 130px; }
     #confirm-salvo { display: none; }
+
+    /* -- Main Menu Dropdown Panels -- */
+    .menu-panel {
+      min-width: 210px;
+      max-width: 380px;
+      font-size: 0.97rem;
+      background: rgba(20,38,55,0.92);
+      border-radius: 12px;
+      box-shadow: 0 2px 12px #21fff655;
+      border: 1.5px solid #00ffeebb;
+      margin: 16px 0 10px;
+      transition: max-height 0.3s cubic-bezier(0.4, 0.2, 0.3, 1), box-shadow 0.2s;
+      overflow: hidden;
+      max-height: 52px;
+      cursor: pointer;
+    }
+    .menu-panel.expanded { max-height: 170px; box-shadow: 0 4px 18px #00fff644; }
+    .menu-tab {
+      background: #1a3e4a;
+      color: #3fffd7;
+      font-size: 1.06rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 7px 0 6px 0;
+      border-radius: 10px 10px 0 0;
+      border-bottom: 1.5px solid #1fffd7aa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .menu-tab:hover { background: #215b68; animation: bounceUpDown 0.6s infinite; }
+    .menu-tab:active { animation: clickDownUp 0.3s; }
+    .menu-arrow { font-size: 1.2em; transition: transform 0.2s; }
+    .menu-panel.expanded .menu-arrow { transform: rotate(180deg); }
+    .menu-content {
+      padding: 12px 16px;
+      background: rgba(17,42,64,0.93);
+      border-radius: 0 0 10px 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
     .grid-title {
   color: #00ffff;
   font-size: 1.5rem;
@@ -907,30 +951,45 @@ pointer-events: none;
       <span>BATTLESHIP<br>ULTRA</span>
       <div class="halo-shine"></div>
     </div>
-    <div class="halo-subtitle">Select Game Mode</div>
-    <div class="halo-menu-options">
-      <select id="mode-select" class="halo-select" aria-label="Game mode">
-        <option value="classic" selected>Classic</option>
-        <option value="salvo">Salvo</option>
-      </select>
+    <div id="mode-panel" class="menu-panel collapsed">
+      <div class="menu-tab" onclick="toggleMenuPanel('mode-panel')">
+        <span>Game Mode</span>
+        <span class="menu-arrow">&#9660;</span>
+      </div>
+      <div class="menu-content">
+        <select id="mode-select" class="halo-select" aria-label="Game mode">
+          <option value="classic" selected>Classic</option>
+          <option value="salvo">Salvo</option>
+        </select>
+      </div>
     </div>
-    <div class="halo-subtitle" style="margin-top:18px;">AI Difficulty</div>
-    <div class="halo-menu-options">
-      <select id="diff-select" class="halo-select" aria-label="AI difficulty">
-        <option value="easy" selected>Easy</option>
-        <option value="medium">Medium</option>
-        <option value="hard">Hard</option>
-        <option value="advanced">Advanced</option>
-        <option value="god">God</option>
-      </select>
+    <div id="diff-panel" class="menu-panel collapsed" style="margin-top:18px;">
+      <div class="menu-tab" onclick="toggleMenuPanel('diff-panel')">
+        <span>AI Difficulty</span>
+        <span class="menu-arrow">&#9660;</span>
+      </div>
+      <div class="menu-content">
+        <select id="diff-select" class="halo-select" aria-label="AI difficulty">
+          <option value="easy" selected>Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+          <option value="advanced">Advanced</option>
+          <option value="god">God</option>
+        </select>
+      </div>
     </div>
-    <div class="halo-subtitle" style="margin-top:18px;">Theme</div>
-    <div class="halo-menu-options">
-      <select id="theme-select" class="halo-select" aria-label="Theme">
-        <option value="navy" selected>Navy</option>
-        <option value="scifi">Sci-Fi</option>
-        <option value="pirate">Pirate</option>
-      </select>
+    <div id="theme-panel" class="menu-panel collapsed" style="margin-top:18px;">
+      <div class="menu-tab" onclick="toggleMenuPanel('theme-panel')">
+        <span>Theme</span>
+        <span class="menu-arrow">&#9660;</span>
+      </div>
+      <div class="menu-content">
+        <select id="theme-select" class="halo-select" aria-label="Theme">
+          <option value="navy" selected>Navy</option>
+          <option value="scifi">Sci-Fi</option>
+          <option value="pirate">Pirate</option>
+        </select>
+      </div>
     </div>
     <div style="margin:30px 0 8px 0;">
       <button class="halo-btn halo-btn-big" id="menu-start" aria-label="Start game">Start Game</button>
@@ -2019,6 +2078,12 @@ function toggleLogPanel() {
 
 function togglePlacementPanel() {
   const panel = document.getElementById('placement-panel');
+  panel.classList.toggle('expanded');
+  panel.classList.toggle('collapsed');
+}
+
+function toggleMenuPanel(id) {
+  const panel = document.getElementById(id);
   panel.classList.toggle('expanded');
   panel.classList.toggle('collapsed');
 }
