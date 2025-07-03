@@ -263,8 +263,21 @@
     /* === MESSAGE AREAS === */
     #messages { min-height: 1.2em; text-align: center; font-size: 1.1rem; margin: 12px auto 0 auto; }
     #placement-hint { text-align: center; font-size: 1.15rem; color: #3fffd7; min-height: 1.2em; }
-    #placement-controls { display: flex; gap: 18px; justify-content: center; align-items: center; margin: 16px 0 10px 0;}
-    #placement-controls select, #placement-controls button { font-size: 1rem; }
+    #placement-controls {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+      margin: 16px 0 10px;
+      padding: 12px 16px;
+      background: rgba(25,40,62,0.75);
+      border: 1px solid #00ffeebb;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px #21fff633;
+    }
+    #placement-controls label { color: #3fffd7; font-weight: bold; }
+    #placement-controls select.halo-select { min-width: 160px; }
+    #placement-controls button.halo-btn { min-width: 130px; }
     #confirm-salvo { display: none; }
     .grid-title {
   color: #00ffff;
@@ -923,9 +936,9 @@ pointer-events: none;
     <div id="main-controls" style="display: none; flex-direction: column; align-items: center; width: 100%;">
       <div id="placement-controls">
         <label>Ship:
-          <select id="ship-select"></select>
+          <select id="ship-select" class="halo-select"></select>
         </label>
-        <button id="toggle-orientation" aria-label="Toggle ship orientation">Horizontal</button>
+        <button id="toggle-orientation" class="halo-btn" aria-label="Toggle ship orientation">Horizontal ↔</button>
         <span id="placement-hint"></span>
       </div>
     </div>
@@ -1288,12 +1301,18 @@ document.addEventListener('visibilitychange', () => {
       currentShipIndex = parseInt(e.target.value);
       showPlacementHint();
     };
-  document.getElementById('toggle-orientation').onclick = () => {
-    placementOrientation = (placementOrientation === 'horizontal') ? 'vertical' : 'horizontal';
-    document.getElementById('toggle-orientation').textContent =
-      placementOrientation.charAt(0).toUpperCase() + placementOrientation.slice(1);
+  const orientBtn = document.getElementById('toggle-orientation');
+  const updateOrientationButton = () => {
+    orientBtn.textContent = placementOrientation === 'horizontal'
+      ? 'Horizontal \u2194'
+      : 'Vertical \u2195';
+  };
+  orientBtn.onclick = () => {
+    placementOrientation = placementOrientation === 'horizontal' ? 'vertical' : 'horizontal';
+    updateOrientationButton();
     showPlacementHint();
   };
+  updateOrientationButton();
   showPlacementHint();
 }
 
@@ -1301,7 +1320,8 @@ document.addEventListener('visibilitychange', () => {
   function showPlacementHint() {
     if (shipsToPlace.length > 0) {
       const ship = shipsToPlace[currentShipIndex];
-      const hint = `Placing: ${ship.icon} ${ship.name} (${ship.class}, ${ship.size}) - ${placementOrientation}`;
+      const orientText = placementOrientation === 'horizontal' ? 'Horizontal \u2194' : 'Vertical \u2195';
+      const hint = `Placing: ${ship.icon} ${ship.name} (${ship.class}, ${ship.size}) - ${orientText}`;
       document.getElementById('placement-hint').textContent = hint;
     } else {
       document.getElementById('placement-hint').textContent = '';
