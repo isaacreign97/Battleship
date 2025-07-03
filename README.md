@@ -815,11 +815,11 @@ pointer-events: none;
 }
 
 /* === RESPONSIVE BOARD LAYOUT === */
-@media (max-width: 768px) and (orientation: portrait) {
+@media (orientation: portrait) {
   .grids-wrapper { flex-direction: column; align-items: center; }
-  .grid { width: 94vw; height: 94vw; max-width: 360px; max-height: 360px; }
+  .grid { width: 90vmin; height: 90vmin; max-width: 360px; max-height: 360px; }
 }
-@media (max-width: 900px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-width: 900px) {
   .grid { width: 45vw; height: 45vw; max-width: 360px; max-height: 360px; }
 }
 
