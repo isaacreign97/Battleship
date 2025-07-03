@@ -241,10 +241,14 @@
       animation: scanFade 0.8s forwards;
     }
     @keyframes scanFade { from {opacity:1;} to {opacity:0;} }
-    /* === RESPONSIVE (STACK GRIDS ON MOBILE) === */
-    @media screen and (max-width: 768px) and (orientation: portrait) {
+    /* === RESPONSIVE BOARD LAYOUT === */
+    @media (orientation: portrait) {
       .grids-wrapper { flex-direction: column; align-items: center; }
-      .grid { width: 97vw; height: 97vw; max-width: 360px; max-height: 360px; }
+      .board-grid { margin: 0 auto; }
+      .grid { width: 94vmin; height: 94vmin; max-width: 360px; max-height: 360px; }
+    }
+    @media (orientation: landscape) {
+      .grids-wrapper { flex-direction: row; justify-content: center; align-items: flex-start; }
     }
     /* === MODALS/MENU OVERLAYS === */
     .menu-modal-show { display: flex !important; }
@@ -447,6 +451,15 @@ position: relative;   /* This is important for z-index to work! */
   transition: opacity 0.3s;
 }
 
+@media (max-width: 600px) {
+  #audio-controls { transform: scale(0.85); bottom: 6px; left: 6px; }
+  #audio-controls input[type=range] { width: 50px; }
+}
+@media (min-width: 1200px) {
+  #audio-controls { transform: scale(1.1); }
+  #audio-controls input[type=range] { width: 70px; }
+}
+
 /* --- Pull Down Action Log Styles --- */
 #action-log-panel {
   min-width: 210px;
@@ -587,14 +600,12 @@ z-index: 10;
 
 /* Responsive: Stacks on small screens */
 @media (max-width: 900px) {
-  #game-container { padding: 12px 0; }
-  .hud-log-row, .grids-row, .control-panel { flex-direction: column; align-items: center; }
-  .grid-label, .board-grid { width: 98vw !important; margin: 0 !important;}
+  #game-container { padding: 12px 0; max-width: 99vw; }
+  .hud-log-row, .control-panel { flex-direction: column; align-items: center; }
 }
-
-@media (max-width: 900px) {
-  #game-container { max-width: 99vw; padding: 2vw; }
-  .grid { width: 97vw; height: 97vw; max-width: 340px; max-height: 340px; }
+@media (max-width: 900px) and (orientation: portrait) {
+  .grid-label, .board-grid { width: 98vw !important; margin: 0 !important; }
+  .grid { width: 95vw; height: 95vw; max-width: 340px; max-height: 340px; }
 }
 
   #starfield {
