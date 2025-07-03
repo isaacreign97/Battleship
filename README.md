@@ -851,7 +851,12 @@ pointer-events: none;
 </head>
 <body>
   <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto" loop></audio>
-  <audio id="hit-sound" src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3" preload="auto"></audio>
+  <audio id="fire-sound" src="crash-7075.mp3" preload="auto"></audio>
+  <audio id="hit-sound" src="explosion-fx-343683.mp3" preload="auto"></audio>
+  <audio id="miss-sound" src="water-splash-02-352021.mp3" preload="auto"></audio>
+  <audio id="victory-sound" src="11l-victory-1749704552668-358772.mp3" preload="auto"></audio>
+  <audio id="defeat-sound" src="game-over-39-199830.mp3" preload="auto"></audio>
+  <audio id="ui-sound" src="ui-sound-270349.mp3" preload="auto"></audio>
 
   <div id="intro-screen">
     <h1 class="title-text">Battleship Ultra</h1>
@@ -1050,7 +1055,15 @@ const createBoard = () =>
   );
 const countCells = (board, prop) => board.flat().reduce((n,c)=>n+(c[prop]?1:0),0);
 const bgMusic = document.getElementById('bg-music');
+const fireSound = document.getElementById('fire-sound');
 const hitSound = document.getElementById('hit-sound');
+const missSound = document.getElementById('miss-sound');
+const victorySound = document.getElementById('victory-sound');
+const defeatSound = document.getElementById('defeat-sound');
+const uiSound = document.getElementById('ui-sound');
+const sfxElems = [fireSound, hitSound, missSound, victorySound, defeatSound, uiSound];
+function playSound(a){ if(a && !audioMuted){ a.currentTime = 0; a.play().catch(()=>{}); } }
+const playUISound = () => playSound(uiSound);
 const muteBtn = document.getElementById('toggle-mute');
 const musicSlider = document.getElementById('music-volume');
 const sfxSlider = document.getElementById('sfx-volume');
@@ -1071,6 +1084,7 @@ if(sfxSlider){
 const confirmSalvoBtn = document.getElementById('confirm-salvo');
 // Fire all selected salvo shots when the confirm button is clicked
 confirmSalvoBtn.onclick = () => {
+  playUISound();
   confirmSalvoBtn.style.display = 'none';
   applyPlayerSalvoShots();
 };
@@ -1089,10 +1103,10 @@ function updateMuteIcon() {
 muteBtn.onclick = () => {
   audioMuted = !audioMuted;
   if(bgMusic) bgMusic.muted = audioMuted;
-  if(hitSound) hitSound.muted = audioMuted;
+  sfxElems.forEach(a => { if(a) a.muted = audioMuted; });
   localStorage.setItem('bs-muted', audioMuted);
   updateMuteIcon();
-}; 
+};
 if(musicSlider){
   const applyMusicVolume = () => { if(bgMusic) bgMusic.volume = parseFloat(musicSlider.value); };
   const setMusicVol = () => { applyMusicVolume(); localStorage.setItem('bs-music-vol', musicSlider.value); };
@@ -1100,7 +1114,10 @@ if(musicSlider){
   musicSlider.addEventListener('input', setMusicVol);
 }
 if(sfxSlider){
-  const applySfxVolume = () => { if(hitSound) hitSound.volume = parseFloat(sfxSlider.value); };
+  const applySfxVolume = () => {
+    const vol = parseFloat(sfxSlider.value);
+    sfxElems.forEach(a => { if(a) a.volume = vol; });
+  };
   const setSfxVol = () => { applySfxVolume(); localStorage.setItem('bs-sfx-vol', sfxSlider.value); };
   setSfxVol();
   sfxSlider.addEventListener('input', setSfxVol);
@@ -1123,6 +1140,7 @@ document.addEventListener('visibilitychange', () => {
   // Animate a missile moving from one cell to another
   function animateMissile(fromElem, toElem, callback, rotate = false) {
     if (!fromElem || !toElem) { if (callback) callback(); return; }
+    playSound(fireSound);
     const fromRect = fromElem.getBoundingClientRect();
     const toRect = toElem.getBoundingClientRect();
     const fromX = fromRect.left + fromRect.width / 2;
@@ -1165,7 +1183,7 @@ document.addEventListener('visibilitychange', () => {
     targetElem.appendChild(ring);
     ring.addEventListener('animationend', () => ring.remove());
     showPulse(targetElem);
-    if(hitSound){ hitSound.currentTime = 0; hitSound.play().catch(()=>{}); }
+    playSound(hitSound);
   }
 
   // Show splash effect for misses
@@ -1180,7 +1198,7 @@ document.addEventListener('visibilitychange', () => {
     document.body.appendChild(splash);
     splash.addEventListener('animationend', () => splash.remove());
     showPulse(targetElem);
-    if(hitSound){ hitSound.currentTime = 0; hitSound.play().catch(()=>{}); }
+    playSound(missSound);
   }
   function showPulse(targetElem) {
     const ring = document.createElement('div');
@@ -1306,6 +1324,7 @@ document.addEventListener('visibilitychange', () => {
     });
     shipSelect.disabled = shipsToPlace.length === 0;
     shipSelect.onchange = (e) => {
+      playUISound();
       currentShipIndex = parseInt(e.target.value);
       showPlacementHint();
     };
@@ -1316,6 +1335,7 @@ document.addEventListener('visibilitychange', () => {
       : 'Vertical \u2195';
   };
   orientBtn.onclick = () => {
+    playUISound();
     placementOrientation = placementOrientation === 'horizontal' ? 'vertical' : 'horizontal';
     updateOrientationButton();
     showPlacementHint();
@@ -1396,6 +1416,7 @@ document.addEventListener('visibilitychange', () => {
       showMessage("Position denied. Choose a valid location.");
       return;
     }
+    playUISound();
     let newShip = { name: ship.name, positions: [] };
     for (let i = 0; i < ship.size; i++) {
       let r = row + (placementOrientation === 'vertical' ? i : 0);
@@ -1786,6 +1807,8 @@ setTurnIndicator("Your Turn");
     document.getElementById("endgame-stats").textContent =
       `Hits: ${hits} • Misses: ${misses} • Accuracy: ${acc}% • Your Ships: ${playerLeft} • Enemy Remaining: ${enemyRemain}`;
     if(bgMusic) bgMusic.pause();
+    if(win && victorySound){ victorySound.currentTime = 0; victorySound.play().catch(()=>{}); }
+    if(!win && defeatSound){ defeatSound.currentTime = 0; defeatSound.play().catch(()=>{}); }
   }
   function hideEndgameModal() {
     const modal = document.getElementById("endgame-modal");
@@ -1850,13 +1873,15 @@ function restartGame() {
   /* ==============================
      BUTTON EVENT HOOKS & INIT
      ============================== */
-  document.getElementById("restart-game").onclick = restartGame;
-  document.getElementById("go-main-menu").onclick = showMainMenu;
+  document.getElementById("restart-game").onclick = () => { playUISound(); restartGame(); };
+  document.getElementById("go-main-menu").onclick = () => { playUISound(); showMainMenu(); };
   document.getElementById("endgame-restart").onclick = function() {
+    playUISound();
     hideEndgameModal();
     restartGame();
   };
   document.getElementById("endgame-mainmenu").onclick = function() {
+    playUISound();
     hideEndgameModal();
     showMainMenu();
   };
@@ -1867,6 +1892,7 @@ function restartGame() {
     document.getElementById('game-container').style.display = 'none';
   };
   document.getElementById('intro-start').onclick = function(){
+    playUISound();
     document.getElementById('intro-screen').classList.add('hide');
     showMainMenu();
     restartGame();
@@ -1933,15 +1959,16 @@ function restartGame() {
   // Dropdowns for menu selections
   const modeSelect = document.getElementById('mode-select');
   selectedMode = modeSelect.value;
-  modeSelect.onchange = () => { selectedMode = modeSelect.value; };
+  modeSelect.onchange = () => { playUISound(); selectedMode = modeSelect.value; };
 
   const diffSelect = document.getElementById('diff-select');
   selectedDiff = diffSelect.value;
-  diffSelect.onchange = () => { selectedDiff = diffSelect.value; };
+  diffSelect.onchange = () => { playUISound(); selectedDiff = diffSelect.value; };
 
   const themeSelect = document.getElementById('theme-select');
   selectedTheme = themeSelect.value;
   themeSelect.onchange = () => {
+    playUISound();
     selectedTheme = themeSelect.value;
     localStorage.setItem('bs-theme', selectedTheme);
     applyTheme(selectedTheme);
@@ -1957,6 +1984,7 @@ function restartGame() {
 
   // Start Game button
   document.getElementById('menu-start').onclick = function() {
+    playUISound();
     // Set game mode & difficulty in your logic:
     window.selectedMode = selectedMode;
     window.selectedDiff = selectedDiff;
@@ -1994,6 +2022,7 @@ function grantPowerup(){
 }
 
 function activatePowerup(index){
+  playUISound();
   activePowerup = {type: earnedPowerups[index], index};
   showMessage(`Select target for ${activePowerup.type==='cluster'?'Cluster Bomb':'Sonar Pulse'}`);
 }
@@ -2103,7 +2132,7 @@ function updateHUD() {
         span.className='power-icon';
         span.textContent = p==='cluster'?'💣':'📡';
         span.title = p==='cluster'?'Cluster Bomb':'Sonar Pulse';
-        span.onclick=()=>activatePowerup(idx);
+        span.onclick=()=>{ playUISound(); activatePowerup(idx); };
         pwrap.appendChild(span);
       });
     }
