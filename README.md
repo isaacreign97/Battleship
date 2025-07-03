@@ -850,13 +850,13 @@ pointer-events: none;
   </style>
 </head>
 <body>
-  <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto" loop></audio>
-  <audio id="fire-sound" src="crash-7075.mp3" preload="auto"></audio>
-  <audio id="hit-sound" src="explosion-fx-343683.mp3" preload="auto"></audio>
-  <audio id="miss-sound" src="water-splash-02-352021.mp3" preload="auto"></audio>
-  <audio id="victory-sound" src="11l-victory-1749704552668-358772.mp3" preload="auto"></audio>
-  <audio id="defeat-sound" src="game-over-39-199830.mp3" preload="auto"></audio>
-  <audio id="ui-sound" src="ui-sound-270349.mp3" preload="auto"></audio>
+  <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto" loop crossOrigin="anonymous"></audio>
+  <audio id="fire-sound" src="crash-7075.mp3" preload="auto" crossOrigin="anonymous"></audio>
+  <audio id="hit-sound" src="explosion-fx-343683.mp3" preload="auto" crossOrigin="anonymous"></audio>
+  <audio id="miss-sound" src="water-splash-02-352021.mp3" preload="auto" crossOrigin="anonymous"></audio>
+  <audio id="victory-sound" src="11l-victory-1749704552668-358772.mp3" preload="auto" crossOrigin="anonymous"></audio>
+  <audio id="defeat-sound" src="game-over-39-199830.mp3" preload="auto" crossOrigin="anonymous"></audio>
+  <audio id="ui-sound" src="ui-sound-270349.mp3" preload="auto" crossOrigin="anonymous"></audio>
 
   <div id="intro-screen">
     <h1 class="title-text">Battleship Ultra</h1>
@@ -1062,6 +1062,16 @@ const victorySound = document.getElementById('victory-sound');
 const defeatSound = document.getElementById('defeat-sound');
 const uiSound = document.getElementById('ui-sound');
 const sfxElems = [fireSound, hitSound, missSound, victorySound, defeatSound, uiSound];
+let audioUnlocked=false;
+function unlockAudio(){
+  if(audioUnlocked) return;
+  audioUnlocked=true;
+  sfxElems.forEach(a=>{if(a){a.muted=audioMuted;a.play().catch(()=>{});a.pause();a.currentTime=0;}});
+  if(bgMusic){bgMusic.muted=audioMuted;bgMusic.play().catch(()=>{});bgMusic.pause();bgMusic.currentTime=0;}
+}
+document.addEventListener("touchstart",unlockAudio,{once:true});
+document.addEventListener("mousedown",unlockAudio,{once:true});
+
 function playSound(a){ if(a && !audioMuted){ a.currentTime = 0; a.play().catch(()=>{}); } }
 const playUISound = () => playSound(uiSound);
 const muteBtn = document.getElementById('toggle-mute');
