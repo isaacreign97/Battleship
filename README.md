@@ -203,35 +203,6 @@
       .grids-wrapper { flex-direction: column; align-items: center; }
       .grid { width: 97vw; height: 97vw; max-width: 360px; max-height: 360px; }
     }
-    /* === CONTROL PANEL BUTTONS === */
-    .control-panel {
-      background: rgba(25, 40, 62, 0.8);
-      border-top: 2px solid #66e0ff;
-      margin-top: 30px;
-      box-shadow: 0 -4px 14px #23e0ff33;
-      padding: 20px;
-      text-align: center;
-      border-radius: 12px;
-    }
-    .control-panel button {
-      background: linear-gradient(135deg, #1de9ff, #00bcd4);
-      border: none;
-      padding: 12px 40px;
-      margin: 0 12px;
-      color: #042630;
-      font-weight: 600;
-      border-radius: 10px;
-      box-shadow: 0 3px 10px #00fff566;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.15s, box-shadow 0.2s;
-    }
-    .control-panel button:hover {
-      background: linear-gradient(135deg, #00d4ff, #0099c3);
-      box-shadow: 0 5px 15px #00fff544;
-      animation: bounceUpDown 0.6s infinite;
-    }
-    .control-panel button:active { animation: clickDownUp 0.3s; }
     /* === MODALS/MENU OVERLAYS === */
     .menu-modal-show { display: flex !important; }
     .menu-modal, #main-menu { display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f1b2bdc; z-index: 2000;}
@@ -964,6 +935,12 @@ window.selectedTheme = theme;
   let hitsForPower = 3;
   const powerTypes = ['cluster','sonar'];
   let nextPowerupIndex = 0;
+const AI_PROB = {easy:0, medium:0.3, hard:0.5, advanced:0.8, god:0.9};
+const createBoard = () =>
+  Array.from({length: BOARD_SIZE}, () =>
+    Array.from({length: BOARD_SIZE}, () => ({hasShip:false, hit:false, miss:false, cellElem:null}))
+  );
+const countCells = (board, prop) => board.flat().reduce((n,c)=>n+(c[prop]?1:0),0);
 const bgMusic = document.getElementById('bg-music');
 const hitSound = document.getElementById('hit-sound');
 const muteBtn = document.getElementById('toggle-mute');
@@ -1343,27 +1320,8 @@ document.addEventListener('visibilitychange', () => {
     return null;
   }
 
-function countPlayerHits() {
-  // Returns total number of hits the player has made on AI ships
-  let hits = 0;
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
-      if (enemyBoard[r][c] && enemyBoard[r][c].hit) hits++;
-    }
-  }
-  return hits;
-}
-
-function countPlayerMisses() {
-  // Returns total number of misses the player has made on AI board
-  let misses = 0;
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
-      if (enemyBoard[r][c] && enemyBoard[r][c].miss) misses++;
-    }
-  }
-  return misses;
-}
+const countPlayerHits = () => countCells(enemyBoard, 'hit');
+const countPlayerMisses = () => countCells(enemyBoard, 'miss');
 
   /* ==============================
      END GAME HANDLING
@@ -1536,14 +1494,7 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
     if (possibleCells.length === 0) return;
 
     let cellToAttack;
-    let prob = 0;
-    switch (aiDifficulty) {
-      case "easy": prob = 0; break;
-      case "medium": prob = 0.3; break;
-      case "hard": prob = 0.5; break;
-      case "advanced": prob = 0.8; break;
-      case "god": prob = 0.9; break;
-    }
+    let prob = AI_PROB[aiDifficulty] || 0;
     let shipCells = possibleCells.filter(({ r, c }) => playerBoard[r][c].hasShip);
     if (shipCells.length > 0 && Math.random() < prob) {
       cellToAttack = shipCells[Math.floor(Math.random() * shipCells.length)];
@@ -1583,14 +1534,7 @@ const rowLabel = String.fromCharCode(65 + row);  // 0 -> 'A', 1 -> 'B', etc.
     function aiDoNextShot() {
       if (idx < shots && options.length > 0) {
         let cellToAttack;
-        let prob = 0;
-        switch (aiDifficulty) {
-          case "easy": prob = 0; break;
-          case "medium": prob = 0.3; break;
-          case "hard": prob = 0.5; break;
-          case "advanced": prob = 0.8; break;
-          case "god": prob = 0.9; break;
-        }
+        let prob = AI_PROB[aiDifficulty] || 0;
         let shipCells = options.filter(({ r, c }) => playerBoard[r][c].hasShip);
         if (shipCells.length > 0 && Math.random() < prob) {
           cellToAttack = shipCells[Math.floor(Math.random() * shipCells.length)];
@@ -1631,13 +1575,7 @@ setTurnIndicator("Your Turn");
 
   // Place AI ships randomly (never overlap)
   function placeAIShips() {
-    aiBoard = [];
-    for (let r = 0; r < BOARD_SIZE; r++) {
-      aiBoard[r] = [];
-      for (let c = 0; c < BOARD_SIZE; c++) {
-        aiBoard[r][c] = { hasShip: false, hit: false, miss: false };
-      }
-    }
+    aiBoard = createBoard();
     aiShips = [];
     for (const ship of SHIPS) {
       let placed = false;
@@ -1721,20 +1659,8 @@ function restartGame() {
   hitsForPower = 3;
   nextPowerupIndex = 0;
   // Set up boards
-  playerBoard = [];
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    playerBoard[r] = [];
-    for (let c = 0; c < BOARD_SIZE; c++) {
-      playerBoard[r][c] = { hasShip: false, hit: false, miss: false, cellElem: null };
-    }
-  }
-  enemyBoard = [];
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    enemyBoard[r] = [];
-    for (let c = 0; c < BOARD_SIZE; c++) {
-      enemyBoard[r][c] = { hasShip: false, hit: false, miss: false, cellElem: null };
-    }
-  }
+  playerBoard = createBoard();
+  enemyBoard = createBoard();
   confirmSalvoBtn.style.display = 'none';
 
   createEmbeddedLabeledBoard('player-board', true);
