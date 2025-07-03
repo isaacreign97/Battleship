@@ -5,28 +5,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Battleship</title>
   <style>
+    :root {
+      --ally: #00e0ff;
+      --enemy: #ff3366;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #1e3c72, #2a5298);
+      font-family: 'Trebuchet MS', Arial, sans-serif;
+      background: linear-gradient(135deg, #011627, #00131a);
+      overflow: hidden;
       color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
     }
+
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0, 224, 255, 0.2), transparent 70%);
+      animation: breathe 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 0.2; }
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: float 20s linear infinite;
+    }
+    .orb.enemy {
+      background: radial-gradient(var(--enemy), transparent 70%);
+    }
+    .orb.ally {
+      background: radial-gradient(var(--ally), transparent 70%);
+    }
+    .orb:nth-child(1) { width: 200px; height: 200px; top: 10%; left: 15%; }
+    .orb:nth-child(2) { width: 150px; height: 150px; top: 70%; left: 70%; animation-delay: 5s; }
+
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-40px); }
+      100% { transform: translateY(0); }
+    }
+
     h1 {
       text-align: center;
+      background: linear-gradient(90deg, var(--ally), var(--enemy));
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 10px;
     }
     .game-container {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      backdrop-filter: blur(8px);
-      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      padding: 20px 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      z-index: 1;
     }
     .boards {
       display: flex;
@@ -35,41 +84,69 @@
     }
     .board {
       display: grid;
-      grid-template-columns: repeat(10, 30px);
-      grid-template-rows: repeat(10, 30px);
+      grid-template-columns: repeat(10, minmax(24px, 1fr));
+      grid-template-rows: repeat(10, minmax(24px, 1fr));
       gap: 2px;
       user-select: none;
     }
     .cell {
-      width: 30px;
-      height: 30px;
-      background: rgba(255, 255, 255, 0.3);
+      width: 28px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 4px;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
+      transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+    .cell:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 6px var(--ally);
     }
     .cell.hit {
-      background: rgba(255, 0, 0, 0.7);
+      background: rgba(255, 0, 64, 0.7);
+      box-shadow: 0 0 10px var(--enemy);
     }
     .cell.miss {
-      background: rgba(0, 123, 255, 0.7);
+      background: rgba(0, 123, 255, 0.5);
+      box-shadow: 0 0 10px var(--ally);
     }
     .cell.ship {
-      background: rgba(0, 255, 0, 0.4);
+      background: rgba(0, 255, 200, 0.3);
+    }
+    .explosion {
+      animation: explode 0.6s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes explode {
+      from { transform: scale(0.5); opacity: 1; }
+      to { transform: scale(1.8); opacity: 0; }
     }
     .controls {
       margin-bottom: 10px;
     }
     button {
-      padding: 6px 12px;
+      padding: 8px 16px;
       border: none;
-      border-radius: 4px;
+      border-radius: 8px;
       cursor: pointer;
+      background: linear-gradient(45deg, var(--ally), #0066ff);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.6);
     }
     .status {
       margin-bottom: 10px;
+      font-weight: bold;
+      background: linear-gradient(90deg, var(--ally), var(--enemy));
+      -webkit-background-clip: text;
+      color: transparent;
     }
     @media (max-width: 600px) {
       .boards {
@@ -80,6 +157,8 @@
   </style>
 </head>
 <body>
+  <div class="orb ally"></div>
+  <div class="orb enemy"></div>
   <div id="root"></div>
 
   <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
@@ -137,11 +216,11 @@
       const [horizontal, setHorizontal] = useState(true);
       const [playerTurn, setPlayerTurn] = useState(false);
       const [aiTargets, setAiTargets] = useState([]);
-      const [status, setStatus] = useState('Place your ships');
+      const [status, setStatus] = useState('Deploy your fleet');
 
       useEffect(() => {
         if (placingIndex >= SHIPS.length) {
-          setStatus('Your turn');
+          setStatus('Awaiting your command');
           setPlayerTurn(true);
         }
       }, [placingIndex]);
@@ -153,7 +232,7 @@
         setHorizontal(true);
         setPlayerTurn(false);
         setAiTargets([]);
-        setStatus('Place your ships');
+        setStatus('Deploy your fleet');
       };
 
       const handlePlace = (x, y) => {
@@ -178,7 +257,7 @@
         }
         setAiBoard(board);
         setPlayerTurn(false);
-        setStatus('AI thinking...');
+        setStatus('Enemy targeting...');
       };
 
       useEffect(() => {
@@ -212,7 +291,7 @@
         }
         setPlayerBoard(board);
         setPlayerTurn(true);
-        setStatus('Your turn');
+        setStatus('Awaiting your command');
       };
 
       const checkVictory = board => {
@@ -227,10 +306,10 @@
       useEffect(() => {
         if (placingIndex < SHIPS.length) return;
         if (checkVictory(aiBoard)) {
-          setStatus('You win!');
+          setStatus('Victory!');
           setPlayerTurn(false);
         } else if (checkVictory(playerBoard)) {
-          setStatus('AI wins!');
+          setStatus('Defeat...');
           setPlayerTurn(false);
         }
       }, [playerBoard, aiBoard, placingIndex]);
@@ -252,7 +331,10 @@
                       if (placingIndex < SHIPS.length && isPlayer) handlePlace(x, y);
                       else if (!isPlayer) handleAttack(x, y);
                     }}
-                  />
+                  >
+                    {cell.hit && <span className="explosion">💥</span>}
+                    {isPlayer && cell.ship && !cell.hit && '🚢'}
+                  </div>
                 );
               })
             )}
