@@ -1,179 +1,338 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Advanced Battleship</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Battleship Deluxe</title>
   <style>
     :root {
       --ally: #00e0ff;
       --enemy: #ff3366;
-      --alert-green: #00ff88;
-      --alert-yellow: #ffc400;
-      --alert-red: #ff3366;
+      --bg-start: #011627;
+      --bg-end: #00131a;
     }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: 'Trebuchet MS', Arial, sans-serif;
-      background: linear-gradient(135deg, #011627, #00131a);
-      overflow: hidden;
+      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
       color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      overflow: hidden;
     }
     body::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(0, 224, 255, 0.2), transparent 70%);
+      background: radial-gradient(circle at center, rgba(0,224,255,0.2), transparent 70%);
       animation: breathe 8s ease-in-out infinite;
       pointer-events: none;
     }
     @keyframes breathe {
-      0%,100%{opacity:0.6;}50%{opacity:0.2;}
+      0%,100% { opacity: 0.6; }
+      50% { opacity: 0.2; }
     }
-    .orb {
-      position:absolute;
-      border-radius:50%;
-      filter:blur(80px);
-      animation:float 20s linear infinite;
+    h1 {
+      text-align: center;
+      background: linear-gradient(90deg,var(--ally),var(--enemy));
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 10px;
     }
-    .orb.enemy{background:radial-gradient(var(--enemy),transparent 70%);}
-    .orb.ally{background:radial-gradient(var(--ally),transparent 70%);}
-    .orb:nth-child(1){width:200px;height:200px;top:10%;left:15%;}
-    .orb:nth-child(2){width:150px;height:150px;top:70%;left:70%;animation-delay:5s;}
-    .orb:nth-child(3){width:180px;height:180px;top:40%;left:80%;animation-delay:10s;}
-    .orb:nth-child(4){width:220px;height:220px;top:80%;left:20%;animation-delay:15s;}
-    @keyframes float{0%{transform:translateY(0);}50%{transform:translateY(-40px);}100%{transform:translateY(0);}}
-    h1{text-align:center;background:linear-gradient(90deg,var(--ally),var(--enemy));-webkit-background-clip:text;color:transparent;margin-bottom:10px;}
-    .command-bar{display:flex;justify-content:space-between;align-items:center;width:100%;padding:5px 10px;font-family:monospace;background:rgba(0,0,0,0.4);border-bottom:1px solid rgba(255,255,255,0.2);margin-bottom:10px;}
-    .command-bar .alert-green{color:var(--alert-green);} .command-bar .alert-yellow{color:var(--alert-yellow);} .command-bar .alert-red{color:var(--alert-red);}
-    .radar{position:relative;width:150px;height:150px;border-radius:50%;border:2px solid var(--ally);overflow:hidden;background:rgba(0,0,0,0.3);}
-    .radar::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at center, rgba(0,224,255,0.2), transparent 70%);}
-    .radar .beam{position:absolute;width:50%;height:2px;top:50%;left:50%;background:var(--ally);transform-origin:0 0;animation:sweep 2s linear infinite;}
-    @keyframes sweep{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
-    .stats-panel{margin-top:10px;width:100%;font-family:monospace;background:rgba(0,0,0,0.4);padding:10px;border-radius:8px;}
-    .health-bar{background:rgba(255,255,255,0.1);height:10px;border-radius:5px;overflow:hidden;margin-top:5px;}
-    .fleet-health{margin-top:5px;}
-    .health{background:var(--ally);height:100%;width:100%;transition:width 0.3s;}
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:100;}
-    .modal-content{background:rgba(0,0,0,0.8);padding:20px 30px;border-radius:8px;text-align:center;}
-    .enemy-board.targeting .cell:hover{box-shadow:0 0 6px #fff,0 0 20px var(--enemy);position:relative;}
-    .enemy-board.targeting .cell:hover::after{content:'';position:absolute;inset:4px;border:1px dashed #fff;border-radius:2px;animation:ping 1s infinite;pointer-events:none;}
-    .enemy-board.targeting .cell:hover::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--enemy);}
-    @keyframes ping{0%{opacity:1;}50%{opacity:0;}100%{opacity:1;}}
-    .game-container{position:relative;display:flex;flex-direction:column;align-items:center;backdrop-filter:blur(10px);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);border-radius:16px;padding:20px 30px;box-shadow:0 10px 30px rgba(0,0,0,0.4);z-index:1;}
-    .boards{display:flex;gap:20px;margin-bottom:20px;}
-    .board{display:grid;grid-template-columns:repeat(10,minmax(24px,1fr));grid-template-rows:repeat(10,minmax(24px,1fr));gap:2px;user-select:none;}
-    .cell{width:28px;height:28px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.1);border-radius:4px;display:flex;justify-content:center;align-items:center;cursor:pointer;transition:background 0.3s,transform 0.3s,box-shadow 0.3s;}
-    .cell:hover{transform:scale(1.1);box-shadow:0 0 6px var(--ally);}
-    .cell.hit{background:rgba(255,0,64,0.7);box-shadow:0 0 10px var(--enemy);position:relative;}
-    .cell.hit::after{content:'';position:absolute;inset:0;border-radius:50%;background:rgba(255,80,80,0.6);animation:explode 0.6s ease-out forwards;pointer-events:none;}
-    .cell.miss{background:rgba(0,123,255,0.5);box-shadow:0 0 10px var(--ally);position:relative;}
-    .cell.miss::after{content:'';position:absolute;inset:0;border-radius:50%;background:rgba(0,123,255,0.5);animation:splash 0.6s ease-out forwards;pointer-events:none;}
-    .cell.ship{background:rgba(0,255,200,0.3);}
-    .cell.revealed{box-shadow:0 0 6px #fff inset;}
-    .explosion{animation:explode 0.6s ease-out forwards;pointer-events:none;}
-    @keyframes explode{from{transform:scale(0.5);opacity:1;}to{transform:scale(1.8);opacity:0;}}
-    @keyframes splash{from{transform:scale(0.5);opacity:0.7;}to{transform:scale(1.5);opacity:0;}}
-    .controls{margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
-    button{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;background:linear-gradient(45deg,var(--ally),#0066ff);color:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.4);transition:transform 0.2s,box-shadow 0.2s;}
-    button:disabled{opacity:0.5;cursor:not-allowed;}
-    button:hover:not(:disabled){transform:scale(1.1);box-shadow:0 6px 15px rgba(0,0,0,0.6);}
-    .status{margin-bottom:10px;font-weight:bold;background:linear-gradient(90deg,var(--ally),var(--enemy));-webkit-background-clip:text;color:transparent;}
-    @media (max-width:600px){.boards{flex-direction:column;align-items:center;}}
+    .container {
+      position: relative;
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,0.05);
+      padding: 20px 30px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .boards {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(10, 30px);
+      grid-template-rows: repeat(10, 30px);
+      gap: 2px;
+      user-select: none;
+    }
+    .cell {
+      width: 30px;
+      height: 30px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+    .cell:hover { transform: scale(1.1); box-shadow: 0 0 6px var(--ally); }
+    .cell.hit { background: rgba(255,0,64,0.7); box-shadow: 0 0 10px var(--enemy); }
+    .cell.miss { background: rgba(0,123,255,0.5); box-shadow: 0 0 10px var(--ally); }
+    .cell.ship { background: rgba(0,255,200,0.3); }
+    .status { font-weight: bold; margin-bottom: 10px; }
+    .controls { margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: linear-gradient(45deg,var(--ally),#0066ff);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover:not(:disabled) { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0,0,0,0.6); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .stats { font-family: monospace; }
+    .health-bar { background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; overflow: hidden; }
+    .health { background: var(--ally); height: 100%; transition: width 0.3s; }
+    @media(max-width:600px){ .boards{flex-direction:column; align-items:center;} }
   </style>
 </head>
 <body>
-  <div class="orb ally"></div>
-  <div class="orb enemy"></div>
-  <div class="orb ally"></div>
-  <div class="orb enemy"></div>
-  <audio id="ambience" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0e6e9a8a36.mp3?filename=ocean-wave-ambient-112527.mp3" loop></audio>
   <div id="root"></div>
   <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
   <script type="text/babel">
-    const {useState,useEffect,useRef} = React;
-    const SHIPS=[
-      {name:'Carrier',size:5},
-      {name:'Battleship',size:4},
-      {name:'Cruiser',size:3},
-      {name:'Submarine',size:3},
-      {name:'Destroyer',size:2},
+    const { useState, useEffect } = React;
+
+    const SHIPS = [
+      { name: 'Carrier', size: 5 },
+      { name: 'Battleship', size: 4 },
+      { name: 'Cruiser', size: 3 },
+      { name: 'Submarine', size: 3 },
+      { name: 'Destroyer', size: 2 }
     ];
-    const createBoard=()=>Array.from({length:10},()=>Array.from({length:10},()=>({ship:null,hit:false,miss:false,revealed:false})));
-    const cloneBoard=b=>b.map(r=>r.map(c=>({...c})));
-    function placeShip(b,s,x,y,h){for(let i=0;i<s.size;i++){const nx=h?x+i:x,ny=h?y:y+i;if(nx>=10||ny>=10||b[ny][nx].ship)return false;}for(let i=0;i<s.size;i++){const nx=h?x+i:x,ny=h?y:y+i;b[ny][nx].ship=s.name;}return true;}
-    function randomPlacement(){const b=createBoard();for(let s of SHIPS){let p=false;while(!p){const h=Math.random()<0.5,x=Math.floor(Math.random()*10),y=Math.floor(Math.random()*10);p=placeShip(b,s,x,y,h);}}return b;}
-    const remainingShips=board=>SHIPS.filter(ship=>board.some(r=>r.some(c=>c.ship===ship.name&&!c.hit))).length;
-    function Game(){
-      const [playerBoard,setPlayerBoard]=useState(createBoard());
-      const [aiBoard,setAiBoard]=useState(randomPlacement());
-      const [placingIndex,setPlacingIndex]=useState(0);
-      const [horizontal,setHorizontal]=useState(true);
-      const [playerTurn,setPlayerTurn]=useState(false);
-      const [aiTargets,setAiTargets]=useState([]);
-      const [status,setStatus]=useState('Deploy your fleet');
-      const [turn,setTurn]=useState(1);
-      const [playerShots,setPlayerShots]=useState(0);
-      const [playerHits,setPlayerHits]=useState(0);
-      const [playerMisses,setPlayerMisses]=useState(0);
-      const [aiHits,setAiHits]=useState(0);
-      const [clock,setClock]=useState(new Date());
-      const [result,setResult]=useState(null);
-      const [difficulty,setDifficulty]=useState('Normal');
-      const [salvoMode,setSalvoMode]=useState(true);
-      const [shotsLeft,setShotsLeft]=useState(1);
-      const [aiShotsLeft,setAiShotsLeft]=useState(0);
-      const [reconUsed,setReconUsed]=useState(false);
-      const [reconMode,setReconMode]=useState(false);
-      const audioCtxRef=useRef(null);
-      const [audioStarted,setAudioStarted]=useState(false);
-      const totalShipCells=SHIPS.reduce((a,s)=>a+s.size,0);
 
-      useEffect(()=>{audioCtxRef.current=new(window.AudioContext||window.webkitAudioContext)();},[]);
-      const playTone=(f,d)=>{const ctx=audioCtxRef.current;if(!ctx)return;const o=ctx.createOscillator();const g=ctx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=0.2;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+d);};
-      const playShot=()=>playTone(400,0.1);
-      const playHit=()=>playTone(120,0.3);
-      const playMiss=()=>playTone(220,0.2);
-      const ensureAudio=()=>{if(!audioStarted){const el=document.getElementById('ambience');el&&el.play().catch(()=>{});setAudioStarted(true);}}
-      useEffect(()=>{const t=setInterval(()=>setClock(new Date()),1000);return()=>clearInterval(t);},[]);
-      useEffect(()=>{if(placingIndex>=SHIPS.length){setStatus('Awaiting your command');setPlayerTurn(true);}},[placingIndex]);
-      const resetGame=()=>{setPlayerBoard(createBoard());setAiBoard(randomPlacement());setPlacingIndex(0);setHorizontal(true);setPlayerTurn(false);setAiTargets([]);setStatus('Deploy your fleet');setTurn(1);setPlayerShots(0);setPlayerHits(0);setPlayerMisses(0);setAiHits(0);setResult(null);setReconUsed(false);setReconMode(false);};
+    const createBoard = () =>
+      Array.from({ length: 10 }, () =>
+        Array.from({ length: 10 }, () => ({ ship: null, hit: false, miss: false }))
+      );
 
-      const handlePlace=(x,y)=>{ensureAudio();if(placingIndex>=SHIPS.length)return;const board=cloneBoard(playerBoard);const ship=SHIPS[placingIndex];if(placeShip(board,ship,x,y,horizontal)){setPlayerBoard(board);setPlacingIndex(placingIndex+1);}};
+    function placeShip(board, ship, x, y, horizontal) {
+      for (let i = 0; i < ship.size; i++) {
+        const nx = horizontal ? x + i : x;
+        const ny = horizontal ? y : y + i;
+        if (nx >= 10 || ny >= 10 || board[ny][nx].ship) return false;
+      }
+      for (let i = 0; i < ship.size; i++) {
+        const nx = horizontal ? x + i : x;
+        const ny = horizontal ? y : y + i;
+        board[ny][nx].ship = ship.name;
+      }
+      return true;
+    }
 
-      const startAiTurn=()=>{const shots=salvoMode?remainingShips(aiBoard):1;setAiShotsLeft(shots);setPlayerTurn(false);setStatus('Enemy targeting...');};
-      const startPlayerTurn=()=>{const shots=salvoMode?remainingShips(playerBoard):1;setShotsLeft(shots);setPlayerTurn(true);setTurn(t=>t+1);setStatus('Awaiting your command');};
+    function randomPlacement() {
+      const b = createBoard();
+      for (const ship of SHIPS) {
+        let placed = false;
+        while (!placed) {
+          const h = Math.random() < 0.5;
+          const x = Math.floor(Math.random() * 10);
+          const y = Math.floor(Math.random() * 10);
+          placed = placeShip(b, ship, x, y, h);
+        }
+      }
+      return b;
+    }
 
-      const handleAttack=(x,y)=>{ensureAudio();if(!playerTurn||shotsLeft<=0||result)return;const board=cloneBoard(aiBoard);const cell=board[y][x];if(cell.hit||cell.miss)return;if(cell.ship){cell.hit=true;setPlayerHits(h=>h+1);playHit();}else{cell.miss=true;setPlayerMisses(m=>m+1);playMiss();}setPlayerShots(s=>s+1);setAiBoard(board);const next=shotsLeft-1;setShotsLeft(next);if(next<=0){startAiTurn();}};
+    function Game() {
+      const [playerBoard, setPlayerBoard] = useState(createBoard());
+      const [aiBoard, setAiBoard] = useState(randomPlacement());
+      const [placingIdx, setPlacingIdx] = useState(0);
+      const [horizontal, setHorizontal] = useState(true);
+      const [playerTurn, setPlayerTurn] = useState(false);
+      const [aiTargets, setAiTargets] = useState([]);
+      const [status, setStatus] = useState('Deploy your fleet');
+      const [playerHits, setPlayerHits] = useState(0);
+      const [playerMisses, setPlayerMisses] = useState(0);
+      const [aiHits, setAiHits] = useState(0);
+      const [result, setResult] = useState(null);
 
-      const handleReconArea=(x,y)=>{if(!reconMode)return;const board=cloneBoard(aiBoard);for(let dy=0;dy<2;dy++){for(let dx=0;dx<2;dx++){const nx=x+dx,ny=y+dy;if(nx<10&&ny<10){board[ny][nx].revealed=true;}}}setAiBoard(board);setReconMode(false);setReconUsed(true);};
+      useEffect(() => {
+        if (placingIdx >= SHIPS.length) {
+          setStatus('Your turn');
+          setPlayerTurn(true);
+        }
+      }, [placingIdx]);
 
-      useEffect(()=>{if(!playerTurn&&placingIndex>=SHIPS.length&&!result&&aiShotsLeft>0){const t=setTimeout(aiMove,500);return()=>clearTimeout(t);}else if(!playerTurn&&aiShotsLeft===0&&placingIndex>=SHIPS.length&&!result){startPlayerTurn();}},[playerTurn,aiShotsLeft,aiTargets,placingIndex,result]);
-      const aiMove=()=>{const board=cloneBoard(playerBoard);playShot();const allAttacked=board.every(r=>r.every(c=>c.hit||c.miss));if(allAttacked){setAiShotsLeft(0);return;}let tx,ty;const rand=()=>{do{tx=Math.floor(Math.random()*10);ty=Math.floor(Math.random()*10);}while(board[ty][tx].hit||board[ty][tx].miss);};
-        if(difficulty==='Easy'){rand();}
-        else if(difficulty==='Hard'&&Math.random()<0.3){const cells=[];board.forEach((row,yy)=>row.forEach((c,xx)=>{if(c.ship&&!c.hit)cells.push([xx,yy]);}));if(cells.length){[tx,ty]=cells[Math.floor(Math.random()*cells.length)];}else if(aiTargets.length){[tx,ty]=aiTargets.pop();}else{rand();}}
-        else{while(true){if(aiTargets.length){const [cx,cy]=aiTargets.pop();if(cx>=0&&cx<10&&cy>=0&&cy<10&&!board[cy][cx].hit&&!board[cy][cx].miss){tx=cx;ty=cy;break;}}else{rand();break;}}}
-        const cell=board[ty][tx];
-        if(cell.ship){cell.hit=true;setAiHits(h=>h+1);setAiTargets(p=>[...p,[tx+1,ty],[tx-1,ty],[tx,ty+1],[tx,ty-1]]);playHit();}else{cell.miss=true;playMiss();}
+      function handlePlace(x, y) {
+        if (placingIdx >= SHIPS.length) return;
+        const board = JSON.parse(JSON.stringify(playerBoard));
+        const ship = SHIPS[placingIdx];
+        if (placeShip(board, ship, x, y, horizontal)) {
+          setPlayerBoard(board);
+          setPlacingIdx(placingIdx + 1);
+        }
+      }
+
+      function handleAttack(x, y) {
+        if (!playerTurn || placingIdx < SHIPS.length || result) return;
+        const board = JSON.parse(JSON.stringify(aiBoard));
+        const cell = board[y][x];
+        if (cell.hit || cell.miss) return;
+        if (cell.ship) {
+          cell.hit = true;
+          setPlayerHits(h => h + 1);
+        } else {
+          cell.miss = true;
+          setPlayerMisses(m => m + 1);
+        }
+        setAiBoard(board);
+        setPlayerTurn(false);
+        setStatus('Enemy turn');
+      }
+
+      useEffect(() => {
+        if (!playerTurn && placingIdx >= SHIPS.length && !result) {
+          const t = setTimeout(aiMove, 500);
+          return () => clearTimeout(t);
+        }
+      }, [playerTurn, aiTargets, aiBoard, result, placingIdx]);
+
+      function aiMove() {
+        const board = JSON.parse(JSON.stringify(playerBoard));
+        let tx, ty;
+        const rand = () => {
+          do {
+            tx = Math.floor(Math.random() * 10);
+            ty = Math.floor(Math.random() * 10);
+          } while (board[ty][tx].hit || board[ty][tx].miss);
+        };
+
+        while (aiTargets.length) {
+          const [cx, cy] = aiTargets.pop();
+          if (cx >= 0 && cx < 10 && cy >= 0 && cy < 10 && !board[cy][cx].hit && !board[cy][cx].miss) {
+            tx = cx;
+            ty = cy;
+            break;
+          }
+        }
+        if (tx === undefined) rand();
+
+        const cell = board[ty][tx];
+        if (cell.ship) {
+          cell.hit = true;
+          setAiHits(h => h + 1);
+          setAiTargets(t => [...t, [tx + 1, ty], [tx - 1, ty], [tx, ty + 1], [tx, ty - 1]]);
+        } else {
+          cell.miss = true;
+        }
         setPlayerBoard(board);
-        const next=aiShotsLeft-1;setAiShotsLeft(next);
-      };
+        setPlayerTurn(true);
+        setStatus('Your turn');
+      }
 
-      const checkVictory=board=>{for(let row of board){for(let cell of row){if(cell.ship&&!cell.hit)return false;}}return true;};
+      function checkVictory(b) {
+        for (const row of b) {
+          for (const cell of row) {
+            if (cell.ship && !cell.hit) return false;
+          }
+        }
+        return true;
+      }
 
-      useEffect(()=>{if(placingIndex<SHIPS.length)return;if(checkVictory(aiBoard)){setStatus('Victory!');setResult('Victory');setPlayerTurn(false);}else if(checkVictory(playerBoard)){setStatus('Defeat...');setResult('Defeat');setPlayerTurn(false);}},[playerBoard,aiBoard,placingIndex]);
+      useEffect(() => {
+        if (placingIdx < SHIPS.length) return;
+        if (checkVictory(aiBoard)) {
+          setResult('Victory!');
+          setStatus('You win!');
+        } else if (checkVictory(playerBoard)) {
+          setResult('Defeat');
+          setStatus('You lose...');
+        }
+      }, [playerBoard, aiBoard, placingIdx]);
 
-      const renderBoard=(board,isPlayer)=>{const cls=isPlayer?'board player-board':`board enemy-board${playerTurn&&!isPlayer&&placingIndex>=SHIPS.length?' targeting':''}`;return(<div className={cls}>{board.map((row,y)=>row.map((cell,x)=>{let c='cell';if(cell.hit)c+=' hit';else if(cell.miss)c+=' miss';else if(isPlayer&&cell.ship)c+=' ship';if(cell.revealed)c+=' revealed';return(<div key={x+','+y} className={c} onClick={()=>{if(placingIndex<SHIPS.length&&isPlayer)handlePlace(x,y);else if(!isPlayer){if(reconMode)handleReconArea(x,y);else handleAttack(x,y);}}>{cell.hit&&<span className="explosion">💥</span>}{(isPlayer&&cell.ship&&!cell.hit)||cell.revealed?'🚢':''}</div>);}))}</div>);};
+      const totalCells = SHIPS.reduce((a, s) => a + s.size, 0);
+      const playerIntegrity = Math.round((1 - aiHits / totalCells) * 100);
+      const enemyIntegrity = Math.round((1 - playerHits / totalCells) * 100);
 
-      const accuracy=playerShots?Math.round((playerHits/playerShots)*100):0;const playerDamage=aiHits/totalShipCells;const enemyDamage=playerHits/totalShipCells;let alertClass='alert-green';if(playerDamage>0.5)alertClass='alert-red';else if(playerDamage>0.2)alertClass='alert-yellow';const clockStr=clock.toLocaleTimeString('en-GB');
+      function renderBoard(board, isPlayer) {
+        const cls = 'board' + (isPlayer ? ' player' : ' enemy');
+        return (
+          <div className={cls}>
+            {board.map((row, y) =>
+              row.map((cell, x) => {
+                let c = 'cell';
+                if (cell.hit) c += ' hit';
+                else if (cell.miss) c += ' miss';
+                else if (isPlayer && cell.ship) c += ' ship';
+                return (
+                  <div
+                    key={x + ',' + y}
+                    className={c}
+                    onClick={() => {
+                      if (placingIdx < SHIPS.length && isPlayer) handlePlace(x, y);
+                      else if (!isPlayer) handleAttack(x, y);
+                    }}
+                  >
+                    {(isPlayer && cell.ship && !cell.hit) && '🚢'}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        );
+      }
 
-      return(<div className="game-container"><div className="command-bar"><span>{clockStr}</span><span className={alertClass}>ALERT</span><span>Turn {turn}</span><span>Shots {playerShots}</span><span>Accuracy {accuracy}%</span></div><h1>Battleship</h1><div className="status">{status}</div>{placingIndex<SHIPS.length&&(<div className="controls"><button onClick={()=>setHorizontal(!horizontal)}>Orientation: {horizontal?'Horizontal':'Vertical'}</button><select value={difficulty} onChange={e=>setDifficulty(e.target.value)}><option>Easy</option><option>Normal</option><option>Hard</option></select><label><input type="checkbox" checked={salvoMode} onChange={e=>setSalvoMode(e.target.checked)}/> Salvo</label></div>)}{placingIndex>=SHIPS.length&&playerTurn&&(<div className="controls"><button disabled={reconUsed} onClick={()=>setReconMode(true)}>Recon Plane</button><span>Shots left: {shotsLeft}</span></div>)}<div className="boards">{renderBoard(playerBoard,true)}{renderBoard(aiBoard,false)}<div className="radar"><div className="beam"></div></div></div><div className="stats-panel"><div>Hits: {playerHits} | Misses: {playerMisses}</div><div className="fleet-health"><div>Player Fleet</div><div className="health-bar"><div className="health" style={{width:`${Math.round((1-playerDamage)*100)}%`}}></div></div></div><div className="fleet-health"><div>Enemy Fleet</div><div className="health-bar"><div className="health" style={{width:`${Math.round((1-enemyDamage)*100)}%`}}></div></div></div></div><button onClick={resetGame}>Reset Game</button>{result&&(<div className="modal"><div className="modal-content"><h2>{result}</h2><p>Final Accuracy: {accuracy}%</p><button onClick={resetGame}>Play Again</button></div></div>)}</div>);
+      function reset() {
+        setPlayerBoard(createBoard());
+        setAiBoard(randomPlacement());
+        setPlacingIdx(0);
+        setHorizontal(true);
+        setPlayerTurn(false);
+        setAiTargets([]);
+        setStatus('Deploy your fleet');
+        setPlayerHits(0);
+        setPlayerMisses(0);
+        setAiHits(0);
+        setResult(null);
+      }
+
+      const accuracy = playerHits + playerMisses ? Math.round((playerHits / (playerHits + playerMisses)) * 100) : 0;
+
+      return (
+        <div className="container">
+          <h1>Battleship</h1>
+          <div className="status">{status}</div>
+          {placingIdx < SHIPS.length && (
+            <div className="controls">
+              <button onClick={() => setHorizontal(!horizontal)}>
+                Orientation: {horizontal ? 'Horizontal' : 'Vertical'}
+              </button>
+            </div>
+          )}
+          <div className="boards">
+            {renderBoard(playerBoard, true)}
+            {renderBoard(aiBoard, false)}
+          </div>
+          <div className="stats">
+            <div>Hits: {playerHits} | Misses: {playerMisses} | Accuracy: {accuracy}%</div>
+            <div style={{ marginTop: '10px' }}>
+              <div>Player Fleet Integrity</div>
+              <div className="health-bar"><div className="health" style={{width: playerIntegrity + '%'}}></div></div>
+              <div>Enemy Fleet Integrity</div>
+              <div className="health-bar"><div className="health" style={{width: enemyIntegrity + '%'}}></div></div>
+            </div>
+          </div>
+          <div className="controls" style={{ marginTop: '15px' }}>
+            <button onClick={reset}>Reset Game</button>
+          </div>
+          {result && <h2>{result}</h2>}
+        </div>
+      );
     }
 
     ReactDOM.render(<Game />, document.getElementById('root'));
