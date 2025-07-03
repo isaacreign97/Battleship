@@ -1,0 +1,65 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom, #4facfe, #00f2fe);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+}
+
+#game {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(10, 30px);
+  grid-template-rows: repeat(10, 30px);
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.cell.hit {
+  background: red;
+}
+
+.cell.miss {
+  background: rgba(0, 0, 255, 0.7);
+}
+
+.status {
+  margin: 10px 0;
+}
+
+.controls button {
+  padding: 6px 12px;
+  margin-right: 10px;
+}
+
+@media (max-width: 600px) {
+  .board {
+    grid-template-columns: repeat(10, 20px);
+    grid-template-rows: repeat(10, 20px);
+  }
+  .cell {
+    width: 20px;
+    height: 20px;
+  }
+}
