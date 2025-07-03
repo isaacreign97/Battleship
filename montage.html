@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Battleship Montage</title>
+<style>
+  body {
+    margin: 0;
+    background: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  #container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+  video {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.5s linear;
+  }
+  .visible {
+    opacity: 1;
+  }
+  .caption {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    text-shadow: 0 0 5px #000;
+    font-size: 1.5em;
+  }
+</style>
+</head>
+<body>
+<h1>Battleship Montage</h1>
+<div id="container">
+  <video id="videoA" muted></video>
+  <video id="videoB" muted></video>
+  <div id="caption" class="caption"></div>
+</div>
+<script>
+const SEGMENTS = [
+  {file: 'videos/battleship_v1.mp4', caption: 'Version 1'},
+  {file: 'videos/battleship_v2.mp4', caption: 'Version 2'},
+  {file: 'videos/battleship_v3.mp4', caption: 'Version 3'},
+  {file: 'videos/battleship_v4.mp4', caption: 'Version 4'},
+  {file: 'videos/battleship_v5.mp4', caption: 'Version 5'},
+  {file: 'videos/battleship_v6.mp4', caption: 'Version 6'},
+  {file: 'videos/battleship_final.mp4', caption: 'Final Version'}
+];
+let current = 0;
+let active = document.getElementById('videoA');
+let next = document.getElementById('videoB');
+const caption = document.getElementById('caption');
+
+function playSegment() {
+  if (current >= SEGMENTS.length) {
+    caption.textContent = '';
+    return;
+  }
+  const segment = SEGMENTS[current];
+  next.src = segment.file;
+  caption.textContent = segment.caption;
+  next.load();
+  next.oncanplay = () => {
+    next.classList.add('visible');
+    next.play();
+    active.classList.remove('visible');
+    setTimeout(() => {
+      active.pause();
+      const tmp = active;
+      active = next;
+      next = tmp;
+      current += 1;
+      active.onended = playSegment;
+    }, 500);
+  };
+  next.onerror = () => {
+    current += 1;
+    playSegment();
+  };
+}
+
+window.onload = () => {
+  active.src = SEGMENTS[current].file;
+  caption.textContent = SEGMENTS[current].caption;
+  active.classList.add('visible');
+  active.onended = playSegment;
+  active.onerror = playSegment;
+  active.load();
+  active.play();
+};
+</script>
+</body>
+</html>

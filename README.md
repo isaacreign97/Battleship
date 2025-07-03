@@ -27,3 +27,10 @@ python3 montage.py
 ```
 
 The resulting `montage.mp4` will contain a simple crossfaded sequence of your gameplay videos with captions showing the version number.
+
+## Browser Montage
+
+Alternatively, open `montage.html` in any modern browser. It attempts to play the
+same `battleship_v1.mp4` … `battleship_final.mp4` clips from the `videos/`
+directory. Clips that are missing are skipped automatically. Each segment is
+displayed with a short caption and a fade transition between videos.
