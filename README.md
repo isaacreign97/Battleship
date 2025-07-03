@@ -851,6 +851,14 @@ pointer-events: none;
 </style>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <!-- Replace placeholder values with your Firebase project configuration -->
+  <script id="firebase-config" type="application/json">
+    {
+      "apiKey": "YOUR_API_KEY",
+      "authDomain": "YOUR_AUTH_DOMAIN",
+      "projectId": "YOUR_PROJECT_ID"
+    }
+  </script>
 </head>
 <body>
   <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto" loop></audio>
@@ -1063,13 +1071,17 @@ let opponentReady = false;
 let gameStartedOnline = false;
 
 function initFirebase(){
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID"
-  };
-  firebase.initializeApp(firebaseConfig);
+  const cfgElem = document.getElementById('firebase-config');
+  if(!cfgElem) return false;
+  let cfg;
+  try { cfg = JSON.parse(cfgElem.textContent); } catch(e){ cfg = null; }
+  if(!cfg || cfg.projectId === 'YOUR_PROJECT_ID'){
+    console.warn('Firebase config missing - online mode disabled');
+    return false;
+  }
+  firebase.initializeApp(cfg);
   db = firebase.firestore();
+  return true;
 }
 const createBoard = () =>
   Array.from({length: BOARD_SIZE}, () =>
@@ -1130,7 +1142,10 @@ updateClock();
 
 // === Online Multiplayer Helpers ===
 async function startOnlineGame(){
-  initFirebase();
+  if(!initFirebase()){
+    alert('Online mode requires Firebase configuration.');
+    return false;
+  }
   const host = confirm('Host a new online match? Click Cancel to join one.');
   const games = db.collection('games');
   if(host){
